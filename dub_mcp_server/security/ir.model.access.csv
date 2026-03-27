@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mcp_server_config,mcp.server.config,model_mcp_server_config,dub_mcp_server.group_mcp_manager,1,1,1,1
+access_mcp_server_model_rule,mcp.server.model.rule,model_mcp_server_model_rule,dub_mcp_server.group_mcp_manager,1,1,1,1
+access_mcp_server_audit,mcp.server.audit,model_mcp_server_audit,dub_mcp_server.group_mcp_manager,1,0,0,1
+access_mcp_model_method,mcp.model.method,model_mcp_model_method,dub_mcp_server.group_mcp_manager,1,1,1,1

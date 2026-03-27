@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Create the FastAPI endpoint -->
+    <record model="fastapi.endpoint" id="endpoint_mcp_server">
+        <field name="name">MCP Server API</field>
+        <field name="description">Model Context Protocol API server with FastAPI.</field>
+        <field name="app">mcp_server</field>
+        <field name="root_path">/mcp</field>
+        <field name="user_id" ref="base.user_admin" />
+    </record>
+</odoo>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Demo configuration for development environments only.
+       Creates a dedicated MCP Server config WITH an example rule on res.partner.
+       Safe defaults: unlink disabled. -->
+  <data noupdate="1">
+    <record id="mcp_server_dev_config" model="mcp.server.config">
+      <field name="name">Dev MCP Config</field>
+      <field name="active">True</field>
+      <field name="transport_http">True</field>
+      <field name="transport_stdio">False</field>
+      <field name="max_page_size">100</field>
+      <field name="default_page_size">25</field>
+      <field name="request_timeout_ms">8000</field>
+      <field name="rate_limit_window_s">60</field>
+      <field name="rate_limit_max_requests">120</field>
+    </record>
+
+    <record id="mcp_rule_res_partner" model="mcp.server.model.rule">
+      <field name="config_id" ref="dub_mcp_server.mcp_server_dev_config"/>
+      <field name="model_id" ref="base.model_res_partner"/>
+      <field name="allow_read">True</field>
+      <field name="allow_create">True</field>
+      <field name="allow_write">True</field>
+      <field name="allow_unlink">False</field>
+      <field name="field_denylist">password, api_key, token, secret</field>
+      <field name="domain_restriction">[]</field>
+      <field name="description">Demo rule: expose contacts for read/create/write with safe denylist; delete disabled.</field>
+    </record>
+  </data>
+</odoo>

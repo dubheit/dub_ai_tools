@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+    <record id="mcp_server_default_config" model="mcp.server.config">
+      <field name="name">Default MCP Server Config</field>
+      <field name="active">False</field>
+      <field name="transport_http">True</field>
+      <field name="transport_stdio">False</field>
+      <field name="max_page_size">200</field>
+      <field name="default_page_size">50</field>
+      <field name="request_timeout_ms">8000</field>
+      <field name="request_body_max_kb">128</field>
+      <field name="rate_limit_window_s">60</field>
+      <field name="rate_limit_max_requests">120</field>
+    </record>
+  </data>
+</odoo>
