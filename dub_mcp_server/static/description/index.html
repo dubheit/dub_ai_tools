@@ -1,0 +1,261 @@
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12" style="text-align: center;">
+            <h2 class="oe_slogan" style="color: #667eea;">
+                <i class="fa fa-plug"></i> MCP Server
+            </h2>
+            <p class="oe_mt32" style="font-size: 18px; color: #555;">
+                Expose Odoo models to AI assistants via Model Context Protocol (MCP).<br/>
+                Native SSE transport with OAuth2 Device Flow authentication.<br/>
+                Works with Claude Desktop, Claude Code, Cursor, Windsurf, Continue, Cline, and more.
+            </p>
+            <p style="background-color: #e8eaf6; padding: 10px 20px; display: inline-block; color: #3949ab;">
+                <i class="fa fa-life-ring"></i>
+                <strong>Free Support</strong> -
+                <a href="mailto:support@dubhe.it" style="color: #667eea;">support@dubhe.it</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">What is MCP?</h3>
+
+        <div class="oe_span12" style="text-align: center;">
+            <p style="font-size: 16px; color: #555;">
+                <strong>Model Context Protocol (MCP)</strong> is an open standard that allows AI assistants
+                to securely access external data sources and tools. This module turns your Odoo instance
+                into an MCP server, enabling AI tools to read, create, update, and delete records
+                based on configurable permissions.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Key Features</h3>
+
+        <div class="oe_span6">
+            <p><i class="fa fa-bolt" style="color: #667eea;"></i>
+            <strong>Native SSE Transport</strong><br/>
+            Direct connection from AI clients - no bridge or proxy required.</p>
+
+            <p><i class="fa fa-shield" style="color: #667eea;"></i>
+            <strong>OAuth2 Device Flow</strong><br/>
+            Secure authentication via browser. User approves access on first connection.</p>
+
+            <p><i class="fa fa-lock" style="color: #667eea;"></i>
+            <strong>Granular Permissions</strong><br/>
+            Control exactly which models and operations each AI client can access.</p>
+        </div>
+
+        <div class="oe_span6">
+            <p><i class="fa fa-history" style="color: #667eea;"></i>
+            <strong>Audit Logging</strong><br/>
+            Track all MCP operations with UI and configurable retention.</p>
+
+            <p><i class="fa fa-tachometer" style="color: #667eea;"></i>
+            <strong>Rate Limiting</strong><br/>
+            Built-in rate limiting to protect your Odoo instance.</p>
+
+            <p><i class="fa fa-cogs" style="color: #667eea;"></i>
+            <strong>Method Execution</strong><br/>
+            Execute whitelisted methods on records with full control.</p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">MCP Tools</h3>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #667eea;"><i class="fa fa-list"></i></p>
+            <h4>list_models</h4>
+            <p style="color: #666;">List available models and permissions</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #667eea;"><i class="fa fa-columns"></i></p>
+            <h4>list_fields</h4>
+            <p style="color: #666;">List field definitions for a model</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #667eea;"><i class="fa fa-search"></i></p>
+            <h4>search</h4>
+            <p style="color: #666;">Search records with domains and filters</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #667eea;"><i class="fa fa-eye"></i></p>
+            <h4>read</h4>
+            <p style="color: #666;">Read specific records by ID</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #28a745;"><i class="fa fa-plus"></i></p>
+            <h4>create</h4>
+            <p style="color: #666;">Create new records</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #ffc107;"><i class="fa fa-pencil"></i></p>
+            <h4>update</h4>
+            <p style="color: #666;">Update existing records</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #dc3545;"><i class="fa fa-trash"></i></p>
+            <h4>delete</h4>
+            <p style="color: #666;">Delete records by ID</p>
+        </div>
+
+        <div class="oe_span4" style="text-align: center;">
+            <p style="font-size: 40px; color: #17a2b8;"><i class="fa fa-terminal"></i></p>
+            <h4>get_logs</h4>
+            <p style="color: #666;">Read Odoo logs for debugging (optional)</p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Quick Setup</h3>
+
+        <div class="oe_span12">
+            <p><strong style="color: #667eea;">1.</strong>
+            Install <strong>dub_oauth2_provider</strong> module for authentication</p>
+
+            <p><strong style="color: #667eea;">2.</strong>
+            Create an <strong>OAuth2 Client</strong> with Device Authorization grant type</p>
+
+            <p><strong style="color: #667eea;">3.</strong>
+            Create an <strong>MCP Configuration</strong> linked to the OAuth2 client</p>
+
+            <p><strong style="color: #667eea;">4.</strong>
+            Add <strong>Model Rules</strong> to define which models can be accessed</p>
+
+            <p><strong style="color: #667eea;">5.</strong>
+            Configure your AI tool with SSE URL and client credentials</p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Client Configuration Example</h3>
+
+        <div class="oe_span12">
+            <p style="font-size: 14px; color: #555; margin-bottom: 15px;">
+                Add this to your <code>claude_desktop_config.json</code> or equivalent:
+            </p>
+            <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; font-size: 13px; overflow-x: auto;">
+{
+  "mcpServers": {
+    "odoo": {
+      "url": "https://your-odoo.com/mcp/sse",
+      "transport": "sse",
+      "headers": {
+        "X-MCP-Client-Id": "your-client-id",
+        "X-MCP-Client-Secret": "your-client-secret"
+      }
+    }
+  }
+}</pre>
+            <p style="font-size: 14px; color: #555; margin-top: 15px;">
+                On first connection, a browser window opens for OAuth2 authentication.
+                After approval, the token is cached and reused automatically.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Endpoints</h3>
+
+        <div class="oe_span12">
+            <table class="table table-bordered">
+                <tr style="background-color: #667eea; color: #fff;">
+                    <th style="padding: 10px;">Endpoint</th>
+                    <th style="padding: 10px;">Description</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><code>/mcp/sse</code></td>
+                    <td style="padding: 10px;">MCP protocol endpoint (SSE transport)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><code>/mcp/health</code></td>
+                    <td style="padding: 10px;">Health check endpoint</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><code>/mcp/search_read</code></td>
+                    <td style="padding: 10px;">REST API: Search and read records</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><code>/mcp/create</code>, <code>/write</code>, <code>/unlink</code></td>
+                    <td style="padding: 10px;">REST API: CRUD operations</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><code>/mcp/methods</code></td>
+                    <td style="padding: 10px;">REST API: List available methods for a model</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><code>/mcp/execute</code></td>
+                    <td style="padding: 10px;">REST API: Execute whitelisted methods on records</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Security Features</h3>
+
+        <div class="oe_span6">
+            <p><i class="fa fa-key" style="color: #667eea;"></i> OAuth2 Device Authorization Flow</p>
+            <p><i class="fa fa-shield" style="color: #667eea;"></i> Method whitelist protection</p>
+            <p><i class="fa fa-user-secret" style="color: #667eea;"></i> User context isolation</p>
+        </div>
+
+        <div class="oe_span6">
+            <p><i class="fa fa-ban" style="color: #667eea;"></i> Field denylist per model</p>
+            <p><i class="fa fa-filter" style="color: #667eea;"></i> Domain restrictions</p>
+            <p><i class="fa fa-clock-o" style="color: #667eea;"></i> Token expiration and refresh</p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container" style="background-color: #e3f2fd; padding: 20px;">
+    <div class="oe_row">
+        <div class="oe_span12" style="text-align: center;">
+            <h4 style="color: #1565c0;">
+                <i class="fa fa-info-circle"></i> Dependencies
+            </h4>
+            <p style="color: #555;">
+                This module requires <strong>dub_oauth2_provider</strong> for authentication
+                and the OCA <strong>fastapi</strong> module for REST endpoints.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container" style="background-color: #e8eaf6; padding: 30px 20px; margin-top: 20px;">
+    <div class="oe_row">
+        <div class="oe_span12" style="text-align: center;">
+            <h3 style="color: #3949ab; margin-bottom: 15px;">Need Help?</h3>
+            <p style="font-size: 16px; margin: 0;">
+                <a href="mailto:support@dubhe.it" style="color: #667eea; font-weight: bold;">
+                    <i class="fa fa-envelope"></i> support@dubhe.it
+                </a>
+                <span style="color: #aaa; margin: 0 15px;">|</span>
+                <i class="fa fa-globe" style="color: #667eea;"></i>
+                <strong style="color: #667eea;">www.dubhe.it</strong>
+            </p>
+        </div>
+    </div>
+</section>
