@@ -1,0 +1,407 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dub_ai_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20251208\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-11 06:26+0000\n"
+"PO-Revision-Date: 2025-12-11 06:26+0000\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "%d new models added."
+msgstr "%d neue Modelle hinzugefügt."
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_dub_ai_model
+msgid "AI Model"
+msgstr "KI-Modell"
+
+#. module: dub_ai_base
+#: model:ir.actions.act_window,name:dub_ai_base.action_ai_model
+#: model:ir.ui.menu,name:dub_ai_base.menu_ai_model
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AI Models"
+msgstr "KI-Modelle"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AI Providers"
+msgstr "KI-Anbieter"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AIzaSy..."
+msgstr "AIzaSy..."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "API Key"
+msgstr "API-Schlüssel"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__active
+msgid "Active"
+msgstr "Aktiv"
+
+#. module: dub_ai_base
+#: model_terms:ir.actions.act_window,help:dub_ai_base.action_ai_model
+msgid "Add AI Models"
+msgstr "KI-Modelle hinzufügen"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Add, edit or sync available AI models from providers"
+msgstr "Verfügbare KI-Modelle von Anbietern hinzufügen, bearbeiten oder synchronisieren"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__claude
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__claude
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Anthropic Claude"
+msgstr "Anthropic Claude"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Archived"
+msgstr "Archiviert"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Claude"
+msgstr "Claude"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_api_key
+msgid "Claude API Key"
+msgstr "Claude API-Schlüssel"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Claude API key is not configured."
+msgstr "Claude API-Schlüssel ist nicht konfiguriert."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Claude Configuration"
+msgstr "Claude Konfiguration"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_model_id
+msgid "Claude Model"
+msgstr "Claude Modell"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Claude Models Synced"
+msgstr "Claude Modelle synchronisiert"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_temperature
+msgid "Claude Temperature"
+msgstr "Claude Temperatur"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_res_company
+msgid "Companies"
+msgstr "Unternehmen"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_res_config_settings
+msgid "Config Settings"
+msgstr "Konfigurationseinstellungen"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure Anthropic Claude API settings"
+msgstr "Anthropic Claude API-Einstellungen konfigurieren"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure Google Gemini API settings"
+msgstr "Google Gemini API-Einstellungen konfigurieren"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure OpenAI API settings"
+msgstr "OpenAI API-Einstellungen konfigurieren"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_claude_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_claude_temperature
+msgid "Controls randomness: 0 = deterministic, 1 = very creative."
+msgstr "Steuert die Zufälligkeit: 0 = deterministisch, 1 = sehr kreativ."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_gemini_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_gemini_temperature
+msgid "Controls randomness: 0 = deterministic, 2 = very creative."
+msgstr "Steuert die Zufälligkeit: 0 = deterministisch, 2 = sehr kreativ."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_openai_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_openai_temperature
+msgid ""
+"Controls randomness: 0 = deterministic, 2 = very creative. Note: o1/o3 "
+"models ignore this."
+msgstr ""
+"Steuert die Zufälligkeit: 0 = deterministisch, 2 = sehr kreativ. Hinweis: o1/o3 "
+"Modelle ignorieren diese Einstellung."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__create_uid
+msgid "Created by"
+msgstr "Erstellt von"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__create_date
+msgid "Created on"
+msgstr "Erstellt am"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_provider
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_provider
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Default AI Provider"
+msgstr "Standard KI-Anbieter"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Default Provider"
+msgstr "Standardanbieter"
+
+#. module: dub_ai_base
+#: model_terms:ir.actions.act_window,help:dub_ai_base.action_ai_model
+msgid ""
+"Define the AI models available for each provider (OpenAI, Claude, Gemini).\n"
+"                Use the <strong>Sync</strong> buttons to fetch models from provider APIs,\n"
+"                or add models manually by clicking <strong>New</strong>."
+msgstr ""
+"Definieren Sie die verfügbaren KI-Modelle für jeden Anbieter (OpenAI, Claude, Gemini).\n"
+"                Verwenden Sie die <strong>Synchronisieren</strong>-Schaltflächen, um Modelle von den Anbieter-APIs abzurufen,\n"
+"                oder fügen Sie Modelle manuell hinzu, indem Sie auf <strong>Neu</strong> klicken."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__display_name
+msgid "Display Name"
+msgstr "Anzeigename"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Gemini"
+msgstr "Gemini"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_api_key
+msgid "Gemini API Key"
+msgstr "Gemini API-Schlüssel"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Gemini API key is not configured."
+msgstr "Gemini API-Schlüssel ist nicht konfiguriert."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Gemini Configuration"
+msgstr "Gemini Konfiguration"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_model_id
+msgid "Gemini Model"
+msgstr "Gemini Modell"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Gemini Models Synced"
+msgstr "Gemini Modelle synchronisiert"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_temperature
+msgid "Gemini Temperature"
+msgstr "Gemini Temperatur"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__gemini
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__gemini
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Google Gemini"
+msgstr "Google Gemini"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Group By"
+msgstr "Gruppieren nach"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__id
+msgid "ID"
+msgstr "ID"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__write_uid
+msgid "Last Updated by"
+msgstr "Zuletzt aktualisiert von"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__write_date
+msgid "Last Updated on"
+msgstr "Zuletzt aktualisiert am"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Manage AI Models"
+msgstr "KI-Modelle verwalten"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Model"
+msgstr "Modell"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__name
+msgid "Model ID"
+msgstr "Modell-ID"
+
+#. module: dub_ai_base
+#: model:ir.model.constraint,message:dub_ai_base.constraint_dub_ai_model_name_provider_uniq
+msgid "Model ID must be unique per provider!"
+msgstr "Die Modell-ID muss pro Anbieter eindeutig sein!"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Models Synced"
+msgstr "Modelle synchronisiert"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "No API keys configured. Please configure at least one provider."
+msgstr "Keine API-Schlüssel konfiguriert. Bitte konfigurieren Sie mindestens einen Anbieter."
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__openai
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__openai
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "OpenAI"
+msgstr "OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_api_key
+msgid "OpenAI API Key"
+msgstr "OpenAI API-Schlüssel"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "OpenAI API key is not configured."
+msgstr "OpenAI API-Schlüssel ist nicht konfiguriert."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "OpenAI Configuration"
+msgstr "OpenAI Konfiguration"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_model_id
+msgid "OpenAI Model"
+msgstr "OpenAI Modell"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "OpenAI Models Synced"
+msgstr "OpenAI Modelle synchronisiert"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_temperature
+msgid "OpenAI Temperature"
+msgstr "OpenAI Temperatur"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__provider
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Provider"
+msgstr "Anbieter"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Select the default AI provider"
+msgstr "Wählen Sie den Standard-KI-Anbieter aus"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__sequence
+msgid "Sequence"
+msgstr "Reihenfolge"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync All Providers"
+msgstr "Alle Anbieter synchronisieren"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync Claude"
+msgstr "Claude synchronisieren"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync Gemini"
+msgstr "Gemini synchronisieren"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync OpenAI"
+msgstr "OpenAI synchronisieren"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Synced from: %s"
+msgstr "Synchronisiert von: %s"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Temperature"
+msgstr "Temperatur"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_dub_ai_model__name
+msgid "The model identifier used in API calls"
+msgstr "Die Modellkennung, die in API-Aufrufen verwendet wird"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "sk-ant-xxxxxxx"
+msgstr "sk-ant-xxxxxxx"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "sk-proj-xxxxxxx"
+msgstr "sk-proj-xxxxxxx"

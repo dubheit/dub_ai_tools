@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ai_model_list" model="ir.ui.view">
+        <field name="name">dub.ai.model.list</field>
+        <field name="model">dub.ai.model</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <header>
+                    <button name="action_sync_all_models" type="object" string="Sync All Providers" class="btn-primary"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="provider"/>
+                <field name="name"/>
+                <field name="display_name"/>
+                <field name="supports_vision"/>
+                <field name="supports_tools"/>
+                <field name="max_output_tokens" optional="hide"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ai_model_form" model="ir.ui.view">
+        <field name="name">dub.ai.model.form</field>
+        <field name="model">dub.ai.model</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="provider"/>
+                            <field name="name"/>
+                            <field name="display_name"/>
+                        </group>
+                        <group>
+                            <field name="supports_vision"/>
+                            <field name="supports_tools"/>
+                            <field name="max_output_tokens"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ai_model_search" model="ir.ui.view">
+        <field name="name">dub.ai.model.search</field>
+        <field name="model">dub.ai.model</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="display_name"/>
+                <field name="provider"/>
+                <separator/>
+                <filter name="filter_vision" string="Vision" domain="[('supports_vision', '=', True)]"/>
+                <filter name="filter_tools" string="Tools" domain="[('supports_tools', '=', True)]"/>
+                <separator/>
+                <filter name="filter_inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="groupby_provider" string="Provider" context="{'group_by': 'provider'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ai_model" model="ir.actions.act_window">
+        <field name="name">AI Models</field>
+        <field name="res_model">dub.ai.model</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add AI Models
+            </p>
+            <p>
+                Define the AI models available for each provider.
+                Use the <strong>Sync</strong> buttons to fetch models from provider APIs,
+                or add models manually by clicking <strong>New</strong>.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ai_model"
+        name="AI Models"
+        parent="base.menu_custom"
+        action="action_ai_model"
+        sequence="100"
+        groups="base.group_system"/>
+
+</odoo>

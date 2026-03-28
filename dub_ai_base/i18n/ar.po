@@ -1,0 +1,407 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dub_ai_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20251208\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-11 06:26+0000\n"
+"PO-Revision-Date: 2025-12-11 06:26+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "%d new models added."
+msgstr "تمت إضافة %d نماذج جديدة."
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_dub_ai_model
+msgid "AI Model"
+msgstr "نموذج الذكاء الاصطناعي"
+
+#. module: dub_ai_base
+#: model:ir.actions.act_window,name:dub_ai_base.action_ai_model
+#: model:ir.ui.menu,name:dub_ai_base.menu_ai_model
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AI Models"
+msgstr "نماذج الذكاء الاصطناعي"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AI Providers"
+msgstr "موفرو الذكاء الاصطناعي"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AIzaSy..."
+msgstr "AIzaSy..."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "API Key"
+msgstr "مفتاح API"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__active
+msgid "Active"
+msgstr "نشط"
+
+#. module: dub_ai_base
+#: model_terms:ir.actions.act_window,help:dub_ai_base.action_ai_model
+msgid "Add AI Models"
+msgstr "إضافة نماذج الذكاء الاصطناعي"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Add, edit or sync available AI models from providers"
+msgstr "إضافة أو تحرير أو مزامنة نماذج الذكاء الاصطناعي المتاحة من الموفرين"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__claude
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__claude
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Anthropic Claude"
+msgstr "Anthropic Claude"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Archived"
+msgstr "مؤرشف"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Claude"
+msgstr "Claude"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_api_key
+msgid "Claude API Key"
+msgstr "مفتاح API لـ Claude"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Claude API key is not configured."
+msgstr "مفتاح API لـ Claude غير مكوّن."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Claude Configuration"
+msgstr "تكوين Claude"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_model_id
+msgid "Claude Model"
+msgstr "نموذج Claude"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Claude Models Synced"
+msgstr "تمت مزامنة نماذج Claude"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_temperature
+msgid "Claude Temperature"
+msgstr "درجة حرارة Claude"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_res_company
+msgid "Companies"
+msgstr "الشركات"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_res_config_settings
+msgid "Config Settings"
+msgstr "تهيئة الإعدادات "
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure Anthropic Claude API settings"
+msgstr "تكوين إعدادات API لـ Anthropic Claude"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure Google Gemini API settings"
+msgstr "تكوين إعدادات API لـ Google Gemini"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure OpenAI API settings"
+msgstr "تكوين إعدادات API لـ OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_claude_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_claude_temperature
+msgid "Controls randomness: 0 = deterministic, 1 = very creative."
+msgstr "يتحكم في العشوائية: 0 = حتمي، 1 = إبداعي جداً."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_gemini_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_gemini_temperature
+msgid "Controls randomness: 0 = deterministic, 2 = very creative."
+msgstr "يتحكم في العشوائية: 0 = حتمي، 2 = إبداعي جداً."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_openai_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_openai_temperature
+msgid ""
+"Controls randomness: 0 = deterministic, 2 = very creative. Note: o1/o3 "
+"models ignore this."
+msgstr ""
+"يتحكم في العشوائية: 0 = حتمي، 2 = إبداعي جداً. ملاحظة: نماذج o1/o3 "
+"تتجاهل هذا الإعداد."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_provider
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_provider
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Default AI Provider"
+msgstr "موفر الذكاء الاصطناعي الافتراضي"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Default Provider"
+msgstr "الموفر الافتراضي"
+
+#. module: dub_ai_base
+#: model_terms:ir.actions.act_window,help:dub_ai_base.action_ai_model
+msgid ""
+"Define the AI models available for each provider (OpenAI, Claude, Gemini).\n"
+"                Use the <strong>Sync</strong> buttons to fetch models from provider APIs,\n"
+"                or add models manually by clicking <strong>New</strong>."
+msgstr ""
+"حدد نماذج الذكاء الاصطناعي المتاحة لكل موفر (OpenAI، Claude، Gemini).\n"
+"                استخدم أزرار <strong>المزامنة</strong> لجلب النماذج من واجهات برمجة التطبيقات للموفرين،\n"
+"                أو أضف النماذج يدوياً بالنقر فوق <strong>جديد</strong>."
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Gemini"
+msgstr "Gemini"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_api_key
+msgid "Gemini API Key"
+msgstr "مفتاح API لـ Gemini"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Gemini API key is not configured."
+msgstr "مفتاح API لـ Gemini غير مكوّن."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Gemini Configuration"
+msgstr "تكوين Gemini"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_model_id
+msgid "Gemini Model"
+msgstr "نموذج Gemini"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Gemini Models Synced"
+msgstr "تمت مزامنة نماذج Gemini"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_temperature
+msgid "Gemini Temperature"
+msgstr "درجة حرارة Gemini"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__gemini
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__gemini
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Google Gemini"
+msgstr "Google Gemini"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Group By"
+msgstr "تجميع حسب"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__id
+msgid "ID"
+msgstr "المعرف"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Manage AI Models"
+msgstr "إدارة نماذج الذكاء الاصطناعي"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Model"
+msgstr "النموذج"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__name
+msgid "Model ID"
+msgstr "معرف النموذج"
+
+#. module: dub_ai_base
+#: model:ir.model.constraint,message:dub_ai_base.constraint_dub_ai_model_name_provider_uniq
+msgid "Model ID must be unique per provider!"
+msgstr "يجب أن يكون معرف النموذج فريداً لكل موفر!"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Models Synced"
+msgstr "تمت مزامنة النماذج"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "No API keys configured. Please configure at least one provider."
+msgstr "لا توجد مفاتيح API مكونة. يرجى تكوين موفر واحد على الأقل."
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__openai
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__openai
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "OpenAI"
+msgstr "OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_api_key
+msgid "OpenAI API Key"
+msgstr "مفتاح API لـ OpenAI"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "OpenAI API key is not configured."
+msgstr "مفتاح API لـ OpenAI غير مكوّن."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "OpenAI Configuration"
+msgstr "تكوين OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_model_id
+msgid "OpenAI Model"
+msgstr "نموذج OpenAI"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "OpenAI Models Synced"
+msgstr "تمت مزامنة نماذج OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_temperature
+msgid "OpenAI Temperature"
+msgstr "درجة حرارة OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__provider
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Provider"
+msgstr "الموفر"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Select the default AI provider"
+msgstr "حدد موفر الذكاء الاصطناعي الافتراضي"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__sequence
+msgid "Sequence"
+msgstr "التسلسل"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync All Providers"
+msgstr "مزامنة جميع الموفرين"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync Claude"
+msgstr "مزامنة Claude"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync Gemini"
+msgstr "مزامنة Gemini"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync OpenAI"
+msgstr "مزامنة OpenAI"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Synced from: %s"
+msgstr "تمت المزامنة من: %s"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Temperature"
+msgstr "درجة الحرارة"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_dub_ai_model__name
+msgid "The model identifier used in API calls"
+msgstr "معرف النموذج المستخدم في استدعاءات API"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "sk-ant-xxxxxxx"
+msgstr "sk-ant-xxxxxxx"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "sk-proj-xxxxxxx"
+msgstr "sk-proj-xxxxxxx"

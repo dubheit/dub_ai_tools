@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ai_model_list_gemini" model="ir.ui.view">
+        <field name="name">dub.ai.model.list.gemini</field>
+        <field name="model">dub.ai.model</field>
+        <field name="inherit_id" ref="dub_ai_base.view_ai_model_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_sync_all_models']" position="after">
+                <button name="action_sync_gemini_models" type="object" string="Sync Gemini"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_ai_model_search_gemini" model="ir.ui.view">
+        <field name="name">dub.ai.model.search.gemini</field>
+        <field name="model">dub.ai.model</field>
+        <field name="inherit_id" ref="dub_ai_base.view_ai_model_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='filter_vision']" position="before">
+                <filter name="filter_gemini" string="Gemini" domain="[('provider', '=', 'gemini')]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="ai_model_mistral_large" model="dub.ai.model">
+        <field name="name">mistral-large-latest</field>
+        <field name="display_name">Mistral Large</field>
+        <field name="provider">mistral</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">1</field>
+    </record>
+    <record id="ai_model_mistral_small" model="dub.ai.model">
+        <field name="name">mistral-small-latest</field>
+        <field name="display_name">Mistral Small</field>
+        <field name="provider">mistral</field>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">2</field>
+    </record>
+    <record id="ai_model_pixtral_large" model="dub.ai.model">
+        <field name="name">pixtral-large-latest</field>
+        <field name="display_name">Pixtral Large</field>
+        <field name="provider">mistral</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">3</field>
+    </record>
+    <record id="ai_model_codestral" model="dub.ai.model">
+        <field name="name">codestral-latest</field>
+        <field name="display_name">Codestral</field>
+        <field name="provider">mistral</field>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">10</field>
+    </record>
+
+</odoo>
