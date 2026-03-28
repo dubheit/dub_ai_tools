@@ -55,7 +55,7 @@
                 <filter name="filter_tools" string="Tools" domain="[('supports_tools', '=', True)]"/>
                 <separator/>
                 <filter name="filter_inactive" string="Archived" domain="[('active', '=', False)]"/>
-                <group string="Group By">
+                <group name="group_by">
                     <filter name="groupby_provider" string="Provider" context="{'group_by': 'provider'}"/>
                 </group>
             </search>

@@ -2,6 +2,7 @@ import logging
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from odoo.models import Constraint, UniqueIndex
 
 _logger = logging.getLogger(__name__)
 
@@ -33,10 +34,10 @@ class AiModel(models.Model):
     sequence = fields.Integer(string="Sequence", default=10)
     active = fields.Boolean(string="Active", default=True)
 
-    _sql_constraints = [
-        ('name_provider_uniq', 'unique(name, provider)',
-         'Model ID must be unique per provider!')
-    ]
+    name_provider_uniq = Constraint(
+        'unique(name, provider)',
+        'Model ID must be unique per provider!',
+    )
 
     @api.depends('name', 'display_name')
     def _compute_display_name(self):
