@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_ai_base" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.ai.base</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="50"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="AI Tools" string="AI Tools" name="ai_tools" groups="base.group_system" logo="/dub_ai_base/static/description/icon.png">
+                    <block title="AI Models" name="ai_models_link">
+                        <setting string="Manage AI Models" help="Add, edit or sync available AI models from providers">
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <button name="%(dub_ai_base.action_ai_model)d" type="action" string="Manage AI Models" class="btn-primary" icon="fa-cogs"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Default Provider" name="default_provider">
+                        <setting string="Default AI Provider" help="Select the default AI provider for all AI features">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="dub_ai_provider" string="Provider" class="col-lg-3"/>
+                                    <field name="dub_ai_provider" class="w-50"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Health Check" name="health_check">
+                        <setting string="Test Provider" help="Enter a prompt and test each provider using the Test Connection button in its configuration below">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="dub_ai_test_prompt" string="Prompt" class="col-lg-3"/>
+                                    <field name="dub_ai_test_prompt" class="w-50" placeholder="Say hello in one word"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+
+                    <block title="Providers" name="providers_activation">
+                        <setting string="OpenAI" help="Enable OpenAI provider (GPT-4o, o1, o3, o4)">
+                            <field name="module_dub_ai_openai"/>
+                        </setting>
+                        <setting string="Anthropic Claude" help="Enable Anthropic Claude provider (Opus, Sonnet, Haiku)">
+                            <field name="module_dub_ai_claude"/>
+                        </setting>
+                        <setting string="Google Gemini" help="Enable Google Gemini provider (Pro, Flash)">
+                            <field name="module_dub_ai_gemini"/>
+                        </setting>
+                        <setting string="Mistral AI" help="Enable Mistral AI provider (Large, Small, Pixtral, Codestral)">
+                            <field name="module_dub_ai_mistral"/>
+                        </setting>
+                        <setting string="Ollama" help="Enable Ollama provider (local/remote, OpenAI-compatible API)">
+                            <field name="module_dub_ai_ollama"/>
+                        </setting>
+                        <setting string="OpenRouter" help="Enable OpenRouter provider (multi-provider gateway)">
+                            <field name="module_dub_ai_openrouter"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

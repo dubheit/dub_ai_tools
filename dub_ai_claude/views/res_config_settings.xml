@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_claude" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.claude</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="dub_ai_base.res_config_settings_view_form_ai_base"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='providers_activation']" position="after">
+                <block title="Anthropic Claude" name="claude_config">
+                    <setting string="Claude Configuration" help="Configure Anthropic Claude API settings">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="dub_ai_claude_api_key" string="API Key" class="col-lg-3"/>
+                                <field name="dub_ai_claude_api_key" placeholder="sk-ant-xxxxxxx" class="w-50" password="True"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="dub_ai_claude_model_id" string="Model" class="col-lg-3"/>
+                                <field name="dub_ai_claude_model_id" class="w-50" options="{'no_create': True}" domain="[('provider', '=', 'claude'), ('active', '=', True)]"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="dub_ai_claude_temperature" string="Temperature" class="col-lg-3"/>
+                                <field name="dub_ai_claude_temperature" class="w-25"/>
+                            </div>
+                            <div class="mt16">
+                                <button name="action_sync_claude" type="object" string="Sync Models" class="btn-secondary" icon="fa-refresh"/> <button name="action_test_claude" type="object" string="Test Connection" class="btn-secondary" icon="fa-heartbeat"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

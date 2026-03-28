@@ -1,0 +1,407 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dub_ai_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20251208\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-11 06:27+0000\n"
+"PO-Revision-Date: 2025-12-11 06:27+0000\n"
+"Last-Translator: \n"
+"Language-Team: Chinese (Simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "%d new models added."
+msgstr "已添加 %d 个新模型。"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_dub_ai_model
+msgid "AI Model"
+msgstr "AI模型"
+
+#. module: dub_ai_base
+#: model:ir.actions.act_window,name:dub_ai_base.action_ai_model
+#: model:ir.ui.menu,name:dub_ai_base.menu_ai_model
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AI Models"
+msgstr "AI模型"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AI Providers"
+msgstr "AI供应商"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "AIzaSy..."
+msgstr "AIzaSy..."
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "API Key"
+msgstr "API密钥"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__active
+msgid "Active"
+msgstr "激活"
+
+#. module: dub_ai_base
+#: model_terms:ir.actions.act_window,help:dub_ai_base.action_ai_model
+msgid "Add AI Models"
+msgstr "添加AI模型"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Add, edit or sync available AI models from providers"
+msgstr "添加、编辑或同步来自供应商的可用AI模型"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__claude
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__claude
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Anthropic Claude"
+msgstr "Anthropic Claude"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Archived"
+msgstr "已归档"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Claude"
+msgstr "Claude"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_api_key
+msgid "Claude API Key"
+msgstr "Claude API密钥"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Claude API key is not configured."
+msgstr "Claude API密钥未配置。"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Claude Configuration"
+msgstr "Claude配置"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_model_id
+msgid "Claude Model"
+msgstr "Claude模型"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Claude Models Synced"
+msgstr "Claude模型已同步"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_claude_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_claude_temperature
+msgid "Claude Temperature"
+msgstr "Claude温度"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_res_company
+msgid "Companies"
+msgstr "公司"
+
+#. module: dub_ai_base
+#: model:ir.model,name:dub_ai_base.model_res_config_settings
+msgid "Config Settings"
+msgstr "配置设定"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure Anthropic Claude API settings"
+msgstr "配置Anthropic Claude API设置"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure Google Gemini API settings"
+msgstr "配置Google Gemini API设置"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Configure OpenAI API settings"
+msgstr "配置OpenAI API设置"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_claude_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_claude_temperature
+msgid "Controls randomness: 0 = deterministic, 1 = very creative."
+msgstr "控制随机性: 0 = 确定性，1 = 非常有创意。"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_gemini_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_gemini_temperature
+msgid "Controls randomness: 0 = deterministic, 2 = very creative."
+msgstr "控制随机性: 0 = 确定性，2 = 非常有创意。"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_res_company__dub_ai_openai_temperature
+#: model:ir.model.fields,help:dub_ai_base.field_res_config_settings__dub_ai_openai_temperature
+msgid ""
+"Controls randomness: 0 = deterministic, 2 = very creative. Note: o1/o3 "
+"models ignore this."
+msgstr ""
+"控制随机性: 0 = 确定性，2 = 非常有创意。注意: o1/o3 "
+"模型忽略此设置。"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__create_uid
+msgid "Created by"
+msgstr "创建者"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__create_date
+msgid "Created on"
+msgstr "创建时间"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_provider
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_provider
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Default AI Provider"
+msgstr "默认AI供应商"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Default Provider"
+msgstr "默认供应商"
+
+#. module: dub_ai_base
+#: model_terms:ir.actions.act_window,help:dub_ai_base.action_ai_model
+msgid ""
+"Define the AI models available for each provider (OpenAI, Claude, Gemini).\n"
+"                Use the <strong>Sync</strong> buttons to fetch models from provider APIs,\n"
+"                or add models manually by clicking <strong>New</strong>."
+msgstr ""
+"定义每个供应商（OpenAI、Claude、Gemini）的可用AI模型。\n"
+"                使用<strong>同步</strong>按钮从供应商API获取模型,\n"
+"                或通过单击<strong>新建</strong>手动添加模型。"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__display_name
+msgid "Display Name"
+msgstr "显示名称"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Gemini"
+msgstr "Gemini"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_api_key
+msgid "Gemini API Key"
+msgstr "Gemini API密钥"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Gemini API key is not configured."
+msgstr "Gemini API密钥未配置。"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Gemini Configuration"
+msgstr "Gemini配置"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_model_id
+msgid "Gemini Model"
+msgstr "Gemini模型"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Gemini Models Synced"
+msgstr "Gemini模型已同步"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_gemini_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_gemini_temperature
+msgid "Gemini Temperature"
+msgstr "Gemini温度"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__gemini
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__gemini
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Google Gemini"
+msgstr "Google Gemini"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Group By"
+msgstr "分组依据"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__id
+msgid "ID"
+msgstr "ID"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__write_uid
+msgid "Last Updated by"
+msgstr "最后更新者"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__write_date
+msgid "Last Updated on"
+msgstr "最后更新时间"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Manage AI Models"
+msgstr "管理AI模型"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Model"
+msgstr "模型"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__name
+msgid "Model ID"
+msgstr "模型ID"
+
+#. module: dub_ai_base
+#: model:ir.model.constraint,message:dub_ai_base.constraint_dub_ai_model_name_provider_uniq
+msgid "Model ID must be unique per provider!"
+msgstr "模型ID必须在每个供应商中唯一！"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Models Synced"
+msgstr "模型已同步"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "No API keys configured. Please configure at least one provider."
+msgstr "未配置API密钥。请至少配置一个供应商。"
+
+#. module: dub_ai_base
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__dub_ai_model__provider__openai
+#: model:ir.model.fields.selection,name:dub_ai_base.selection__res_company__dub_ai_provider__openai
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "OpenAI"
+msgstr "OpenAI"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_api_key
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_api_key
+msgid "OpenAI API Key"
+msgstr "OpenAI API密钥"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "OpenAI API key is not configured."
+msgstr "OpenAI API密钥未配置。"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "OpenAI Configuration"
+msgstr "OpenAI配置"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_model_id
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_model_id
+msgid "OpenAI Model"
+msgstr "OpenAI模型"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "OpenAI Models Synced"
+msgstr "OpenAI模型已同步"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_company__dub_ai_openai_temperature
+#: model:ir.model.fields,field_description:dub_ai_base.field_res_config_settings__dub_ai_openai_temperature
+msgid "OpenAI Temperature"
+msgstr "OpenAI温度"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__provider
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_search
+msgid "Provider"
+msgstr "供应商"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Select the default AI provider"
+msgstr "选择默认AI供应商"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,field_description:dub_ai_base.field_dub_ai_model__sequence
+msgid "Sequence"
+msgstr "序列"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync All Providers"
+msgstr "同步所有供应商"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync Claude"
+msgstr "同步Claude"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync Gemini"
+msgstr "同步Gemini"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.view_ai_model_list
+msgid "Sync OpenAI"
+msgstr "同步OpenAI"
+
+#. module: dub_ai_base
+#. odoo-python
+#: code:addons/dub_ai_base/models/ai_model.py:0
+msgid "Synced from: %s"
+msgstr "同步自: %s"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "Temperature"
+msgstr "温度"
+
+#. module: dub_ai_base
+#: model:ir.model.fields,help:dub_ai_base.field_dub_ai_model__name
+msgid "The model identifier used in API calls"
+msgstr "API调用中使用的模型标识符"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "sk-ant-xxxxxxx"
+msgstr "sk-ant-xxxxxxx"
+
+#. module: dub_ai_base
+#: model_terms:ir.ui.view,arch_db:dub_ai_base.res_config_settings_view_form_ai_base
+msgid "sk-proj-xxxxxxx"
+msgstr "sk-proj-xxxxxxx"

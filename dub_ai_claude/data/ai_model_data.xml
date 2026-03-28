@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="ai_model_claude_opus_46" model="dub.ai.model">
+        <field name="name">claude-opus-4-6-20260320</field>
+        <field name="display_name">Claude Opus 4.6</field>
+        <field name="provider">claude</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">16384</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="ai_model_claude_sonnet_46" model="dub.ai.model">
+        <field name="name">claude-sonnet-4-6-20260320</field>
+        <field name="display_name">Claude Sonnet 4.6</field>
+        <field name="provider">claude</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">16384</field>
+        <field name="sequence">2</field>
+    </record>
+    <record id="ai_model_claude_haiku_45" model="dub.ai.model">
+        <field name="name">claude-haiku-4-5-20251001</field>
+        <field name="display_name">Claude Haiku 4.5</field>
+        <field name="provider">claude</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">8192</field>
+        <field name="sequence">3</field>
+    </record>
+
+</odoo>

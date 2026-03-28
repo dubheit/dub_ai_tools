@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="ai_model_openai_gpt4o" model="dub.ai.model">
+        <field name="name">gpt-4o</field>
+        <field name="display_name">GPT-4o</field>
+        <field name="provider">openai</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">1</field>
+    </record>
+    <record id="ai_model_openai_gpt4o_mini" model="dub.ai.model">
+        <field name="name">gpt-4o-mini</field>
+        <field name="display_name">GPT-4o Mini</field>
+        <field name="provider">openai</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">2</field>
+    </record>
+    <record id="ai_model_openai_o1" model="dub.ai.model">
+        <field name="name">o1</field>
+        <field name="display_name">o1</field>
+        <field name="provider">openai</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="ai_model_openai_o3_mini" model="dub.ai.model">
+        <field name="name">o3-mini</field>
+        <field name="display_name">o3 Mini</field>
+        <field name="provider">openai</field>
+        <field name="sequence">12</field>
+    </record>
+    <record id="ai_model_openai_o4_mini" model="dub.ai.model">
+        <field name="name">o4-mini</field>
+        <field name="display_name">o4 Mini</field>
+        <field name="provider">openai</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">13</field>
+    </record>
+
+</odoo>

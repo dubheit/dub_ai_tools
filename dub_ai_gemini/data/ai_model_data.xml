@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="ai_model_gemini_25_pro" model="dub.ai.model">
+        <field name="name">gemini-2.5-pro</field>
+        <field name="display_name">Gemini 2.5 Pro</field>
+        <field name="provider">gemini</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">1</field>
+    </record>
+    <record id="ai_model_gemini_25_flash" model="dub.ai.model">
+        <field name="name">gemini-2.5-flash</field>
+        <field name="display_name">Gemini 2.5 Flash</field>
+        <field name="provider">gemini</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">2</field>
+    </record>
+    <record id="ai_model_gemini_20_flash" model="dub.ai.model">
+        <field name="name">gemini-2.0-flash</field>
+        <field name="display_name">Gemini 2.0 Flash</field>
+        <field name="provider">gemini</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="sequence">10</field>
+    </record>
+
+</odoo>
