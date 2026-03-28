@@ -34,7 +34,7 @@ class AiModel(models.Model):
     sequence = fields.Integer(string="Sequence", default=10)
     active = fields.Boolean(string="Active", default=True)
 
-    name_provider_uniq = Constraint(
+    _name_provider_uniq = Constraint(
         'unique(name, provider)',
         'Model ID must be unique per provider!',
     )
