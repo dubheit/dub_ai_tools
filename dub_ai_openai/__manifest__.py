@@ -1,6 +1,6 @@
 {
     "name": "AI Provider - OpenAI",
-    "version": "18.0.1.0.0",
+    "version": "19.0.1.0.0",
     "category": "Technical",
     "summary": "OpenAI provider for AI Base (GPT-4o, o1, o3, o4)",
     "author": "Dubhe",

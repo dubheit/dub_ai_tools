@@ -1,6 +1,6 @@
 {
     "name": "AI Provider - Google Gemini",
-    "version": "18.0.1.0.0",
+    "version": "19.0.1.0.0",
     "category": "Technical",
     "summary": "Google Gemini provider for AI Base (Pro, Flash)",
     "author": "Dubhe",

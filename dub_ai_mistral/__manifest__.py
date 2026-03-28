@@ -1,6 +1,6 @@
 {
     "name": "AI Provider - Mistral AI",
-    "version": "18.0.1.0.0",
+    "version": "19.0.1.0.0",
     "category": "Technical",
     "summary": "Mistral AI provider for AI Base (Large, Small, Pixtral, Codestral)",
     "author": "Dubhe",

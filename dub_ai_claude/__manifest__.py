@@ -1,6 +1,6 @@
 {
     "name": "AI Provider - Anthropic Claude",
-    "version": "18.0.1.0.0",
+    "version": "19.0.1.0.0",
     "category": "Technical",
     "summary": "Anthropic Claude provider for AI Base (Opus, Sonnet, Haiku)",
     "author": "Dubhe",

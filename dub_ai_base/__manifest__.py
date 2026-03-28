@@ -1,6 +1,6 @@
 {
     "name": "AI Base",
-    "version": "18.0.3.0.0",
+    "version": "19.0.3.0.0",
     "category": "Technical",
     "summary": "AI providers integration base with unified calling interface",
     "description": """
