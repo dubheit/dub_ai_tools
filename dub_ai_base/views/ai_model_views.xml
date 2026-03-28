@@ -51,15 +51,11 @@
         <field name="model">dub.ai.model</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
-                <field name="display_name"/>
-                <field name="provider"/>
-                <separator/>
                 <filter name="filter_vision" string="Vision" domain="[('supports_vision', '=', True)]"/>
                 <filter name="filter_tools" string="Tools" domain="[('supports_tools', '=', True)]"/>
                 <separator/>
                 <filter name="filter_inactive" string="Archived" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
+                <group string="Group By">
                     <filter name="groupby_provider" string="Provider" context="{'group_by': 'provider'}"/>
                 </group>
             </search>
