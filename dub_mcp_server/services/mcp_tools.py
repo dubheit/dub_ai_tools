@@ -247,6 +247,32 @@ def get_tools_list(env: Environment, config=None) -> list:
                 },
                 "required": ["model", "method"]
             }
+        },
+        {
+            "name": "read_resource",
+            "description": (
+                "Read an MCP resource by URI. Available resources:\n"
+                "- odoo://modules/installed — list installed modules\n"
+                "- odoo://model/{model}/schema — field definitions\n"
+                "- odoo://model/{model}/{id} — read a record (full web_read)\n"
+                "- odoo://model/{model}?domain={domain}&limit={limit} — search records"
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "uri": {
+                        "type": "string",
+                        "description": (
+                            "Resource URI, e.g.: "
+                            "odoo://model/res.partner/1, "
+                            "odoo://model/res.partner/schema, "
+                            "odoo://model/res.partner?domain=[('is_company','=',True)]&limit=5, "
+                            "odoo://modules/installed"
+                        )
+                    }
+                },
+                "required": ["uri"]
+            }
         }
     ]
 
@@ -1039,6 +1065,18 @@ def execute_tool(
                     f"{entry['message']}\n"
                 )
             return _build_result(result, [], return_tracking_info)
+
+        elif tool_name == "read_resource":
+            uri = arguments.get("uri", "")
+            if not uri:
+                return _build_result(
+                    "Error: 'uri' parameter is required",
+                    [], return_tracking_info)
+
+            from .mcp_resources import read_resource
+            content, mime_type = read_resource(
+                env, uri, config=config, user_id=user_id)
+            return _build_result(content, [], return_tracking_info)
 
         else:
             return _build_result(f"Unknown tool: {tool_name}", [], return_tracking_info)
