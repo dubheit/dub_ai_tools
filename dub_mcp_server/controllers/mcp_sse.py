@@ -251,7 +251,10 @@ class MCPSSENativeController(http.Controller):
                     "id": req_id,
                     "result": {
                         "protocolVersion": "2024-11-05",
-                        "capabilities": {"tools": {"listChanged": False}},
+                        "capabilities": {
+                            "tools": {"listChanged": False},
+                            "resources": {"listChanged": False},
+                        },
                         "serverInfo": {
                             "name": "Dubhe MCP Server",
                             "version": "1.0.0"
@@ -298,6 +301,39 @@ class MCPSSENativeController(http.Controller):
                         response["result"]["_context"] = ctx
 
                 return response
+
+            elif method == "resources/list":
+                from ..services.mcp_resources import get_resources_list
+                resources = get_resources_list(env, config=config)
+                return {
+                    "jsonrpc": "2.0", "id": req_id,
+                    "result": {"resources": resources},
+                }
+
+            elif method == "resources/templates/list":
+                from ..services.mcp_resources import get_resource_templates_list
+                templates = get_resource_templates_list(env, config=config)
+                return {
+                    "jsonrpc": "2.0", "id": req_id,
+                    "result": {"resourceTemplates": templates},
+                }
+
+            elif method == "resources/read":
+                from ..services.mcp_resources import read_resource
+                uri = params.get("uri", "")
+                content, mime_type = read_resource(
+                    env, uri, config=config, user_id=user_id,
+                )
+                return {
+                    "jsonrpc": "2.0", "id": req_id,
+                    "result": {
+                        "contents": [{
+                            "uri": uri,
+                            "mimeType": mime_type,
+                            "text": content,
+                        }],
+                    },
+                }
 
             elif method == "ping":
                 return {"jsonrpc": "2.0", "id": req_id, "result": {}}
