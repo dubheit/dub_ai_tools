@@ -18,8 +18,8 @@ def get_resources_list(env, config=None):
         },
     ]
 
-    if config and config.model_ids:
-        for model_access in config.model_ids:
+    if config and config.rule_ids:
+        for model_access in config.rule_ids:
             model_name = model_access.model_id.model
             resources.append({
                 "uri": "odoo://model/%s/schema" % model_name,
@@ -91,8 +91,8 @@ def _check_model_access(env, model_name, config):
     """Check if model is accessible via MCP config."""
     if model_name not in env:
         return "Model '%s' not found" % model_name
-    if config and config.model_ids:
-        allowed = [m.model_id.model for m in config.model_ids]
+    if config and config.rule_ids:
+        allowed = [m.model_id.model for m in config.rule_ids]
         if model_name not in allowed:
             return "Model '%s' not allowed by MCP configuration" % model_name
     return None
