@@ -128,8 +128,18 @@ def _read_model_schema(env, model_name, config):
     return json.dumps(fields_info, indent=2), "application/json"
 
 
+def _get_fields_spec(env, model_name):
+    """Get the fields spec for web_read, using the default form view."""
+    Model = env[model_name]
+    try:
+        view = Model.get_view(False, 'form')
+        return Model._get_fields_spec(view)
+    except Exception:
+        return {}
+
+
 def _read_record(env, model_name, record_id, config):
-    """Read a specific record."""
+    """Read a specific record using Odoo's web_read (same as /json/ route)."""
     error = _check_model_access(env, model_name, config)
     if error:
         return json.dumps({"error": error}), "application/json"
@@ -140,45 +150,44 @@ def _read_record(env, model_name, record_id, config):
             {"error": "Record %s/%d not found" % (model_name, record_id)}
         ), "application/json"
 
-    data = record.read()[0]
-    # Convert non-serializable values
-    for key, val in data.items():
-        if isinstance(val, bytes):
-            data[key] = "<binary>"
-        elif hasattr(val, 'isoformat'):
-            data[key] = val.isoformat()
+    spec = _get_fields_spec(env, model_name)
+    if spec:
+        data = record.web_read(spec)[0]
+    else:
+        data = record.read()[0]
+
     return json.dumps(data, indent=2, default=str), "application/json"
 
 
 def _read_search(env, model_name, query_string, config):
-    """Search records with domain and limit."""
+    """Search records using Odoo's web_search_read (same as /json/ route)."""
     error = _check_model_access(env, model_name, config)
     if error:
         return json.dumps({"error": error}), "application/json"
 
-    # Parse query parameters
+    import ast
     import urllib.parse
     params = urllib.parse.parse_qs(query_string)
     domain_str = params.get("domain", ["[]"])[0]
     limit = int(params.get("limit", ["80"])[0])
     limit = min(limit, 200)
+    offset = int(params.get("offset", ["0"])[0])
 
     try:
-        import ast
         domain = ast.literal_eval(domain_str)
     except (ValueError, SyntaxError):
         return json.dumps(
             {"error": "Invalid domain: %s" % domain_str}
         ), "application/json"
 
-    records = env[model_name].search(domain, limit=limit)
-    data = records.read()
-
-    for record in data:
-        for key, val in record.items():
-            if isinstance(val, bytes):
-                record[key] = "<binary>"
-            elif hasattr(val, 'isoformat'):
-                record[key] = val.isoformat()
+    Model = env[model_name]
+    spec = _get_fields_spec(env, model_name)
+    if spec:
+        data = Model.web_search_read(
+            domain, spec, limit=limit, offset=offset,
+        )
+    else:
+        records = Model.search(domain, limit=limit, offset=offset)
+        data = {"records": records.read(), "length": len(records)}
 
     return json.dumps(data, indent=2, default=str), "application/json"
