@@ -392,8 +392,11 @@ class MCPSSENativeController(http.Controller):
             user_id=user_id,
         )
 
-        # Sanitize response to prevent oversized responses
-        from ..services.response_sanitizer import sanitize_response
-        response = sanitize_response(response)
+        # Sanitize tool responses to prevent oversized SSE messages
+        # Skip sanitization for resources (client explicitly requested the data)
+        method = request_data.get("method", "")
+        if not method.startswith("resources/"):
+            from ..services.response_sanitizer import sanitize_response
+            response = sanitize_response(response)
 
         return request.make_json_response(response)

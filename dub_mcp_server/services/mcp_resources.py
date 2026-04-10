@@ -123,9 +123,9 @@ def _read_model_schema(env, model_name, config):
     Model = env[model_name]
     fields_info = Model.fields_get(
         attributes=["string", "type", "required", "readonly",
-                     "help", "selection", "relation"]
+                     "selection", "relation"]
     )
-    return json.dumps(fields_info, indent=2), "application/json"
+    return json.dumps(fields_info, default=str), "application/json"
 
 
 def _get_fields_spec(env, model_name):
