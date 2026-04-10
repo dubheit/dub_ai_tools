@@ -18,8 +18,8 @@ def get_resources_list(env, config=None):
         },
     ]
 
-    if config and config.model_ids:
-        for model_access in config.model_ids:
+    if config and config.rule_ids:
+        for model_access in config.rule_ids:
             model_name = model_access.model_id.model
             resources.append({
                 "uri": "odoo://model/%s/schema" % model_name,
