@@ -247,6 +247,32 @@ def get_tools_list(env: Environment, config=None) -> list:
                 },
                 "required": ["model", "method"]
             }
+        },
+        {
+            "name": "read_resource",
+            "description": (
+                "Read an MCP resource by URI. Available resources:\n"
+                "- odoo://modules/installed — list installed modules\n"
+                "- odoo://model/{model}/schema — field definitions\n"
+                "- odoo://model/{model}/{id} — read a record (full web_read)\n"
+                "- odoo://model/{model}?domain={domain}&limit={limit} — search records"
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "uri": {
+                        "type": "string",
+                        "description": (
+                            "Resource URI, e.g.: "
+                            "odoo://model/res.partner/1, "
+                            "odoo://model/res.partner/schema, "
+                            "odoo://model/res.partner?domain=[('is_company','=',True)]&limit=5, "
+                            "odoo://modules/installed"
+                        )
+                    }
+                },
+                "required": ["uri"]
+            }
         }
     ]
 
@@ -706,17 +732,19 @@ def execute_tool(
                 return _build_result(f"Access denied: user cannot create {model} records", [], return_tracking_info)
 
             values = _ensure_dict(arguments.get("values"), {})
-            if not values:
-                return _build_result("Error: values must be a non-empty dictionary", [], return_tracking_info)
+            if not isinstance(values, dict):
+                return _build_result("Error: values must be a dictionary", [], return_tracking_info)
 
             # Get optional context from arguments
             extra_ctx = _ensure_dict(arguments.get("context"), {})
+            if not isinstance(extra_ctx, dict):
+                return _build_result("Error: context must be a dictionary", [], return_tracking_info)
 
             # Merge with default context
             ctx = {"mail_create_nosubscribe": True}
             ctx.update(extra_ctx)
 
-            record = env[model].sudo().with_context(**ctx).create(values)
+            record = env[model].with_context(**ctx).create(values)
             # Flush in user context before request ends to avoid empty user issue
             env.flush_all()
             _audit(
@@ -769,8 +797,8 @@ def execute_tool(
                 return _build_result(f"Error: {err}", [], return_tracking_info)
 
             values = _ensure_dict(arguments.get("values"), {})
-            if not values:
-                return _build_result("Error: values must be a non-empty dictionary", [], return_tracking_info)
+            if not isinstance(values, dict):
+                return _build_result("Error: values must be a dictionary", [], return_tracking_info)
 
             # Check Odoo ACL + record rules for the authenticated user
             try:
@@ -781,6 +809,8 @@ def execute_tool(
 
             # Get optional context from arguments
             extra_ctx = _ensure_dict(arguments.get("context"), {})
+            if not isinstance(extra_ctx, dict):
+                return _build_result("Error: context must be a dictionary", [], return_tracking_info)
 
             if extra_ctx:
                 records = records.with_context(**extra_ctx)
@@ -788,7 +818,7 @@ def execute_tool(
             # Get display names before update for tracking
             display_names = [str(r.display_name) if hasattr(r, "display_name") else f"ID {r.id}" for r in records]
 
-            records.sudo().write(values)
+            records.write(values)
             # Flush in user context before request ends to avoid empty user issue
             env.flush_all()
             _audit(
@@ -849,7 +879,7 @@ def execute_tool(
             # Get display names before delete for tracking
             display_names = [str(r.display_name) if hasattr(r, "display_name") else f"ID {r.id}" for r in records]
 
-            records.sudo().unlink()
+            records.unlink()
             # Flush in user context before request ends to avoid empty user issue
             env.flush_all()
             _audit(
@@ -1035,6 +1065,18 @@ def execute_tool(
                     f"{entry['message']}\n"
                 )
             return _build_result(result, [], return_tracking_info)
+
+        elif tool_name == "read_resource":
+            uri = arguments.get("uri", "")
+            if not uri:
+                return _build_result(
+                    "Error: 'uri' parameter is required",
+                    [], return_tracking_info)
+
+            from .mcp_resources import read_resource
+            content, mime_type = read_resource(
+                env, uri, config=config, user_id=user_id)
+            return _build_result(content, [], return_tracking_info)
 
         else:
             return _build_result(f"Unknown tool: {tool_name}", [], return_tracking_info)
