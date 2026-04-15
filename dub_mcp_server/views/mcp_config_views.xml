@@ -77,6 +77,9 @@
                       <field name="domain_restriction" placeholder='[("active", "=", True)]'/>
                       <field name="description"/>
                     </group>
+                    <group string="PII Masking" invisible="not model_id">
+                      <field name="pii_mask_field_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit': True}"/>
+                    </group>
                     <separator string="Allowed Methods" invisible="not model_id"/>
                     <div invisible="not model_id" class="mb-3">
                       <button name="action_refresh_methods" type="object" string="⟳ Refresh Available Methods" class="btn btn-secondary"/>
