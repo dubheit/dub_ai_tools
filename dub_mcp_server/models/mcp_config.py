@@ -140,6 +140,16 @@ class McpServerModelRule(models.Model):
     )
     description = fields.Text()
 
+    # PII masking
+    pii_mask_field_ids = fields.Many2many(
+        "ir.model.fields",
+        string="PII Masked Fields",
+        domain="[('model_id', '=', model_id)]",
+        help="Fields whose values will be masked in MCP responses "
+             "(e.g., email, phone, vat). Only the first and last "
+             "characters are shown."
+    )
+
     # Method permissions
     allowed_method_ids = fields.Many2many(
         "mcp.model.method",

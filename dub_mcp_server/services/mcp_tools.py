@@ -249,6 +249,114 @@ def get_tools_list(env: Environment, config=None) -> list:
             }
         },
         {
+            "name": "get_record_actions",
+            "description": (
+                "Get available workflow actions for a specific record. "
+                "Inspects the form view header buttons and evaluates visibility "
+                "conditions against the record's current state. "
+                "Use call_method to execute the returned actions."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "description": "Model name (e.g., sale.order)"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "description": "Record ID"
+                    }
+                },
+                "required": ["model", "id"]
+            }
+        },
+        {
+            "name": "domain_validate",
+            "description": (
+                "Validate an Odoo search domain before executing it. "
+                "Checks that all field names exist on the model, operators are valid, "
+                "and the domain syntax is correct. "
+                "Use this before calling 'search' with complex domains to avoid errors."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "description": "Model name (e.g., res.partner)"
+                    },
+                    "domain": {
+                        "type": "array",
+                        "description": "Domain to validate (e.g., [('state', '=', 'draft')])"
+                    }
+                },
+                "required": ["model", "domain"]
+            }
+        },
+        {
+            "name": "get_selection_values",
+            "description": (
+                "Get the allowed values for a Selection field on an Odoo model. "
+                "Returns a list of (value, label) pairs. "
+                "Useful to know valid options before creating or filtering records."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "description": "Model name (e.g., sale.order)"
+                    },
+                    "field": {
+                        "type": "string",
+                        "description": "Selection field name (e.g., state)"
+                    }
+                },
+                "required": ["model", "field"]
+            }
+        },
+        {
+            "name": "name_search",
+            "description": (
+                "Search records by name using Odoo's native name_search. "
+                "This searches across multiple fields (e.g., for res.partner "
+                "it matches name, email, VAT, reference). "
+                "Ideal for resolving a human-readable name to record IDs."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "description": "Model name (e.g., res.partner)"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name or text to search for",
+                        "default": ""
+                    },
+                    "operator": {
+                        "type": "string",
+                        "description": "Comparison operator",
+                        "enum": ["ilike", "like", "=", "not ilike", "not like", "!="],
+                        "default": "ilike"
+                    },
+                    "domain": {
+                        "type": "array",
+                        "description": "Additional domain filter to restrict results",
+                        "default": []
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Max results (default 10, max 100)",
+                        "default": 10
+                    }
+                },
+                "required": ["model", "name"]
+            }
+        },
+        {
             "name": "read_resource",
             "description": (
                 "Read an MCP resource by URI. Available resources:\n"
@@ -432,6 +540,69 @@ def _apply_domain_restriction(rule, domain: list) -> list:
     except (json.JSONDecodeError, TypeError):
         pass
     return domain
+
+
+def _mask_value(value):
+    """Mask a PII value, showing only first and last characters."""
+    if not value or not isinstance(value, str):
+        return value
+    value = value.strip()
+    if not value:
+        return value
+    # Email: d****e@domain.com
+    if "@" in value:
+        local, domain = value.rsplit("@", 1)
+        if len(local) <= 2:
+            masked_local = local[0] + "***"
+        else:
+            masked_local = local[0] + "****" + local[-1]
+        return f"{masked_local}@{domain}"
+    # Short values (<=4 chars): show first char only
+    if len(value) <= 4:
+        return value[0] + "***"
+    # Default: first 2 and last 2
+    return value[:2] + "****" + value[-2:]
+
+
+def _apply_pii_masking(rule, record_data: dict) -> dict:
+    """Apply PII masking to record data based on rule config."""
+    if not rule or not rule.pii_mask_field_ids:
+        return record_data
+    masked_fields = {f.name for f in rule.pii_mask_field_ids}
+    if not masked_fields:
+        return record_data
+    result = {}
+    for k, v in record_data.items():
+        if k in masked_fields:
+            result[k] = _mask_value(v)
+        else:
+            result[k] = v
+    return result
+
+
+def _eval_invisible(expr, record_vals):
+    """
+    Evaluate an Odoo invisible expression against record values.
+    Handles both simple field references (e.g., 'state != "draft"')
+    and Python-like expressions.
+    """
+    import ast
+
+    # Build a safe evaluation context from record values
+    eval_ctx = {}
+    for k, v in record_vals.items():
+        if isinstance(v, (list, tuple)) and len(v) == 2 and isinstance(v[0], int):
+            # Many2one tuple (id, name) → use id for truthiness
+            eval_ctx[k] = v[0]
+        elif isinstance(v, list):
+            eval_ctx[k] = v
+        else:
+            eval_ctx[k] = v
+
+    try:
+        return bool(eval(expr, {"__builtins__": {}}, eval_ctx))  # noqa: S307
+    except Exception:
+        return False
 
 
 def _validate_model(env, model_name: str) -> tuple[bool, str]:
@@ -625,6 +796,7 @@ def execute_tool(
             tracking_names = []
             for r in records:
                 r = _filter_fields(rule, req_fields, r)
+                r = _apply_pii_masking(rule, r)
                 result += f"- ID {r.get('id')}: {r.get('display_name', r)}\n"
                 tracking_ids.append(r.get("id"))
                 tracking_names.append(str(r.get("display_name", f"ID {r.get('id')}")))
@@ -678,6 +850,7 @@ def execute_tool(
             result = f"{model} record(s):\n"
             for r in records:
                 r = _filter_fields(rule, req_fields, r)
+                r = _apply_pii_masking(rule, r)
                 result += f"\nID {r.get('id')}:\n"
                 tracking_ids.append(r.get("id"))
                 tracking_names.append(str(r.get("display_name", f"ID {r.get('id')}")))
@@ -1065,6 +1238,268 @@ def execute_tool(
                     f"{entry['message']}\n"
                 )
             return _build_result(result, [], return_tracking_info)
+
+        elif tool_name == "get_record_actions":
+            model = arguments.get("model")
+            record_id = arguments.get("id")
+            if not model:
+                return _build_result("Error: model parameter is required", [], return_tracking_info)
+            if not record_id:
+                return _build_result("Error: id parameter is required", [], return_tracking_info)
+
+            valid, err = _validate_model(env, model)
+            if not valid:
+                return _build_result(f"Error: {err}", [], return_tracking_info)
+
+            allowed, error = _check_permission(config, model, "read")
+            if not allowed:
+                return _build_result(f"Access denied: {error}", [], return_tracking_info)
+
+            record = env[model].browse(int(record_id))
+            if not record.exists():
+                return _build_result(f"Error: {model} record {record_id} not found", [], return_tracking_info)
+
+            # Get the form view and parse header buttons
+            from lxml import etree
+            try:
+                view_data = env[model].get_view(False, "form")
+                arch = view_data.get("arch", "")
+                if isinstance(arch, str):
+                    tree = etree.fromstring(arch.encode("utf-8") if isinstance(arch, str) else arch)
+                else:
+                    tree = arch
+            except Exception as e:
+                return _build_result(f"Error reading form view: {e}", [], return_tracking_info)
+
+            # Read record values for evaluating invisible conditions
+            record_vals = record.read([])[0] if record else {}
+
+            # Extract header buttons
+            header = tree.find(".//header")
+            actions = []
+            if header is not None:
+                for btn in header.findall("button"):
+                    btn_name = btn.get("name")
+                    btn_string = btn.get("string", btn_name)
+                    btn_type = btn.get("type", "object")
+                    invisible_expr = btn.get("invisible", "")
+
+                    if not btn_name or btn_type != "object":
+                        continue
+
+                    # Evaluate invisible condition
+                    is_visible = True
+                    if invisible_expr:
+                        try:
+                            is_visible = not _eval_invisible(invisible_expr, record_vals)
+                        except Exception:
+                            is_visible = True  # Show if we can't evaluate
+
+                    if is_visible:
+                        actions.append({
+                            "method": btn_name,
+                            "label": btn_string,
+                        })
+
+            if not actions:
+                # Fallback: report state info
+                state_val = record_vals.get("state", "N/A")
+                return _build_result(
+                    f"No actions available for {model} #{record_id} (state: {state_val})",
+                    [], return_tracking_info
+                )
+
+            state_val = record_vals.get("state", "N/A")
+            result = f"Available actions for {model} #{record_id} (state: {state_val}):\n"
+            for a in actions:
+                result += f"- {a['label']} → call_method(model='{model}', method='{a['method']}', ids=[{record_id}])\n"
+
+            _audit(env, config, user_id, "get_record_actions", model=model, status="success", record_ids=[int(record_id)])
+            return _build_result(result, [], return_tracking_info)
+
+        elif tool_name == "domain_validate":
+            model = arguments.get("model")
+            if not model:
+                return _build_result("Error: model parameter is required", [], return_tracking_info)
+
+            valid, err = _validate_model(env, model)
+            if not valid:
+                return _build_result(f"Error: {err}", [], return_tracking_info)
+
+            allowed, error = _check_permission(config, model, "search")
+            if not allowed:
+                return _build_result(f"Access denied: {error}", [], return_tracking_info)
+
+            domain = _ensure_list(arguments.get("domain"), [])
+            if not domain:
+                return _build_result("Domain is empty — valid but will match all records.", [], return_tracking_info)
+
+            VALID_OPERATORS = {
+                "=", "!=", "<", ">", "<=", ">=",
+                "like", "not like", "ilike", "not ilike",
+                "=like", "=ilike", "in", "not in",
+                "child_of", "parent_of",
+                "any", "not any",
+            }
+            LOGIC_OPERATORS = {"&", "|", "!"}
+
+            Model = env[model]
+            all_fields = Model.fields_get(attributes=["type", "relation"])
+            errors = []
+
+            for idx, leaf in enumerate(domain):
+                if isinstance(leaf, str):
+                    if leaf not in LOGIC_OPERATORS:
+                        errors.append(f"[{idx}] Invalid logic operator: '{leaf}'")
+                    continue
+
+                if not isinstance(leaf, (list, tuple)) or len(leaf) != 3:
+                    errors.append(f"[{idx}] Invalid leaf format: expected (field, operator, value), got {leaf!r}")
+                    continue
+
+                field_path, operator, value = leaf
+
+                if not isinstance(field_path, str):
+                    errors.append(f"[{idx}] Field name must be a string, got {type(field_path).__name__}")
+                    continue
+
+                if operator not in VALID_OPERATORS:
+                    errors.append(f"[{idx}] Invalid operator '{operator}' on '{field_path}'")
+
+                # Validate field path (supports dotted paths like partner_id.name)
+                parts = field_path.split(".")
+                current_fields = all_fields
+                current_model = model
+                for i, part in enumerate(parts):
+                    if part not in current_fields:
+                        # Suggest similar fields
+                        from difflib import get_close_matches
+                        candidates = get_close_matches(part, current_fields.keys(), n=3, cutoff=0.6)
+                        hint = ""
+                        if candidates:
+                            hint = f" — did you mean: {', '.join(candidates)}?"
+                        errors.append(f"[{idx}] Field '{part}' not found on {current_model}{hint}")
+                        break
+                    # If there are more parts, traverse the relation
+                    if i < len(parts) - 1:
+                        finfo = current_fields[part]
+                        if not finfo.get("relation"):
+                            errors.append(f"[{idx}] Field '{part}' on {current_model} is not a relational field, cannot traverse")
+                            break
+                        current_model = finfo["relation"]
+                        current_fields = env[current_model].fields_get(attributes=["type", "relation"])
+
+            if errors:
+                result = f"Domain validation FAILED for {model}:\n"
+                for e in errors:
+                    result += f"  {e}\n"
+                return _build_result(result, [], return_tracking_info)
+
+            return _build_result(
+                f"Domain is valid for {model}. {len(domain)} element(s) checked.",
+                [], return_tracking_info
+            )
+
+        elif tool_name == "get_selection_values":
+            model = arguments.get("model")
+            field = arguments.get("field")
+            if not model:
+                return _build_result("Error: model parameter is required", [], return_tracking_info)
+            if not field:
+                return _build_result("Error: field parameter is required", [], return_tracking_info)
+
+            valid, err = _validate_model(env, model)
+            if not valid:
+                return _build_result(f"Error: {err}", [], return_tracking_info)
+
+            allowed, error = _check_permission(config, model, "read")
+            if not allowed:
+                return _build_result(f"Access denied: {error}", [], return_tracking_info)
+
+            # Check field denylist
+            rule = _get_model_rule(config, model)
+            if rule and rule.field_denylist:
+                denied = {f.strip() for f in rule.field_denylist.split(",") if f.strip()}
+                if field in denied:
+                    return _build_result(f"Access denied: field '{field}' is restricted", [], return_tracking_info)
+
+            fields_info = env[model].fields_get([field], attributes=["type", "selection", "string"])
+            if field not in fields_info:
+                return _build_result(f"Error: field '{field}' not found on {model}", [], return_tracking_info)
+
+            finfo = fields_info[field]
+            if finfo.get("type") != "selection":
+                return _build_result(
+                    f"Error: '{field}' is a {finfo.get('type')} field, not a selection",
+                    [], return_tracking_info
+                )
+
+            selection = finfo.get("selection", [])
+            if not selection:
+                return _build_result(f"No selection values for {model}.{field}", [], return_tracking_info)
+
+            result = f"Selection values for {model}.{field} ({finfo.get('string', field)}):\n"
+            for value, label in selection:
+                result += f"- '{value}': {label}\n"
+
+            _audit(env, config, user_id, "get_selection_values", model=model, status="success")
+            return _build_result(result, [], return_tracking_info)
+
+        elif tool_name == "name_search":
+            model = arguments.get("model")
+            if not model:
+                return _build_result("Error: model parameter is required", [], return_tracking_info)
+
+            valid, err = _validate_model(env, model)
+            if not valid:
+                return _build_result(f"Error: {err}", [], return_tracking_info)
+
+            allowed, error = _check_permission(config, model, "search")
+            if not allowed:
+                return _build_result(f"Access denied: {error}", [], return_tracking_info)
+
+            name = arguments.get("name", "")
+            operator = arguments.get("operator", "ilike")
+            if operator not in ("ilike", "like", "=", "not ilike", "not like", "!="):
+                return _build_result("Error: invalid operator", [], return_tracking_info)
+
+            rule = _get_model_rule(config, model)
+            domain = _ensure_list(arguments.get("domain"), [])
+            domain = _apply_domain_restriction(rule, domain)
+            limit = min(int(arguments.get("limit", 10)), 100)
+
+            matches = env[model].name_search(
+                name, args=domain, operator=operator, limit=limit
+            )
+
+            if not matches:
+                return _build_result(
+                    f"No {model} records matching '{name}'",
+                    [], return_tracking_info
+                )
+
+            tracking_ids = []
+            tracking_names = []
+            result = f"Found {len(matches)} {model} match(es) for '{name}':\n"
+            for rec_id, rec_name in matches:
+                result += f"- ID {rec_id}: {rec_name}\n"
+                tracking_ids.append(rec_id)
+                tracking_names.append(str(rec_name))
+
+            _audit(
+                env, config, user_id, "name_search", model=model,
+                status="success",
+                request_excerpt={"name": name, "operator": operator}
+            )
+
+            tracking_info = [{
+                "model": model,
+                "ids": tracking_ids,
+                "display_names": tracking_names,
+                "operation": "name_search"
+            }] if tracking_ids else []
+
+            return _build_result(result, tracking_info, return_tracking_info)
 
         elif tool_name == "read_resource":
             uri = arguments.get("uri", "")
