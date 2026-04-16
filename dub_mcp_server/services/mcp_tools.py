@@ -839,10 +839,17 @@ def execute_tool(
             rule = _get_model_rule(config, model)
             req_fields = _ensure_list(arguments.get("fields"), [])
 
-            records = env[model].browse(ids).read(req_fields or [])
-
-            if not records:
+            accessible = env[model].search([("id", "in", ids)])
+            denied_ids = set(ids) - set(accessible.ids)
+            if not accessible:
+                if denied_ids:
+                    return _build_result(
+                        f"Access denied: no permission to read {model} records {sorted(denied_ids)}",
+                        [], return_tracking_info
+                    )
                 return _build_result("No records found", [], return_tracking_info)
+
+            records = accessible.read(req_fields or [])
 
             # Collect tracking info
             tracking_ids = []
