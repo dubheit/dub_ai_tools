@@ -21,8 +21,11 @@ class TestMCPConfig(TransactionCase):
             'email': 'test@mcp.com',
         })
 
-        # Ensure MCP config exists
-        cls.mcp_config = cls.env['mcp.server.config'].get_singleton()
+        # Create MCP config (deny by default, no singleton fallback)
+        cls.mcp_config = cls.env['mcp.server.config'].create({
+            'name': 'Test MCP Config',
+            'active': True,
+        })
         cls.mcp_config.write({
             'active': True,
             'rate_limit_window_s': 60,
@@ -58,11 +61,10 @@ class TestMCPConfig(TransactionCase):
             'phone': '+1234567890',
         })
 
-    def test_config_singleton(self):
-        """Test config singleton pattern."""
-        config1 = self.env['mcp.server.config'].get_singleton()
-        config2 = self.env['mcp.server.config'].get_singleton()
-        self.assertEqual(config1.id, config2.id)
+    def test_config_deny_by_default(self):
+        """Test that get_singleton returns empty recordset (deny by default)."""
+        config = self.env['mcp.server.config'].get_singleton()
+        self.assertFalse(config)
 
     def test_config_values(self):
         """Test config has expected values."""
