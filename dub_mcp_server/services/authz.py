@@ -25,6 +25,10 @@ def _get_config(env):
 def ensure_enabled(ctx: AuthContext, env):
     """Check if MCP Server is enabled."""
     cfg = _get_config(env)
+    if not cfg:
+        raise errors.AuthzDenied(
+            "No MCP configuration found for this user."
+        )
     if not cfg.active:
         raise errors.AuthzDenied(
             "MCP Server is disabled by configuration."
@@ -34,6 +38,10 @@ def ensure_enabled(ctx: AuthContext, env):
 def check_operation(ctx: AuthContext, model: str, op: str, env):
     """Check if operation is allowed on model."""
     cfg = _get_config(env)
+    if not cfg:
+        raise errors.AuthzDenied(
+            "No MCP configuration found for this user."
+        )
     domain = [("config_id", "=", cfg.id), ("model_name", "=", model)]
     rule = env["mcp.server.model.rule"].sudo().search(domain, limit=1)
     if not rule:

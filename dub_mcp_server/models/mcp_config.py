@@ -67,40 +67,35 @@ class McpServerConfig(models.Model):
     )
 
     @api.model
-    def get_singleton(self):
-        """Get default active config (no OAuth2 client linked)"""
-        rec = self.search([
-            ("oauth2_client_id", "=", False),
-            ("active", "=", True)
-        ], limit=1)
-        if not rec:
-            rec = self.search([("active", "=", True)], limit=1)
-        return rec  # Returns None if no active config
-
-    @api.model
     def get_by_oauth2_client(self, client_id):
-        """Get active config linked to specific OAuth2 client"""
+        """Get active config linked to specific OAuth2 client."""
         if client_id:
-            rec = self.search([
+            return self.search([
                 ("oauth2_client_id", "=", client_id),
                 ("active", "=", True)
             ], limit=1)
-            if rec:
-                return rec
-        # Fallback to default singleton only if no client-specific config
-        return self.get_singleton()
+        return self.browse()
 
     @api.model
     def get_by_access_token(self, token_string):
-        """Get active config based on OAuth2 access token"""
+        """Get active config based on OAuth2 access token.
+
+        Deny by default: only returns a config if the OAuth2
+        client is explicitly linked to one.
+        """
         try:
             AccessToken = self.env["oauth2.access_token"].sudo()
             token = AccessToken.find_by_token(token_string)
             if token and token.is_valid():
                 return self.get_by_oauth2_client(token.client_id.id)
         except Exception:
-            pass  # OAuth2 module may not be installed
-        return self.get_singleton()
+            pass
+        return self.browse()
+
+    @api.model
+    def get_singleton(self):
+        """Backward compat — deny by default (empty recordset)."""
+        return self.browse()
 
 
 class McpServerModelRule(models.Model):
