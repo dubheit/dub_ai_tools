@@ -75,62 +75,51 @@ class McpServerConfig(models.Model):
     )
 
     @api.model
-    def get_default(self):
-        """Get default active config (no users linked)"""
-        rec = self.search([
-            ("user_ids", "=", False),
-            ("active", "=", True)
-        ], limit=1)
-        if not rec:
-            rec = self.search([("active", "=", True)], limit=1)
-        return rec
-
-    @api.model
     def get_by_user(self, user_id):
-        """Get active config linked to a specific user, fallback to default"""
+        """Get active config explicitly linked to a specific user."""
         if user_id:
-            rec = self.search([
+            return self.search([
                 ("user_ids", "in", [user_id]),
                 ("active", "=", True)
             ], limit=1)
-            if rec:
-                return rec
-        return self.get_default()
-
-    # Keep for backward compatibility
-    get_singleton = get_default
+        return self.browse()
 
     @api.model
     def get_by_oauth2_client(self, client_id):
-        """Get active config linked to specific OAuth2 client"""
+        """Get active config linked to specific OAuth2 client."""
         if client_id:
-            rec = self.search([
+            return self.search([
                 ("oauth2_client_id", "=", client_id),
                 ("active", "=", True)
             ], limit=1)
-            if rec:
-                return rec
-        return self.get_default()
+        return self.browse()
 
     @api.model
     def get_by_access_token(self, token_string):
         """Get active config based on OAuth2 access token.
 
-        Priority: user-specific config > client-specific config > default
+        Deny by default: only returns a config if the user or
+        the OAuth2 client is explicitly linked to one.
+        Priority: user-specific config > client-specific config.
         """
         try:
             AccessToken = self.env["oauth2.access_token"].sudo()
             token = AccessToken.find_by_token(token_string)
             if token and token.is_valid():
-                # First try user-specific config
                 user_config = self.get_by_user(token.user_id.id)
-                if user_config and user_config.user_ids:
+                if user_config:
                     return user_config
-                # Then try client-specific config
                 return self.get_by_oauth2_client(token.client_id.id)
         except Exception:
             pass
-        return self.get_default()
+        return self.browse()
+
+    @api.model
+    def get_singleton(self):
+        """Backward compat — deny by default (empty recordset)."""
+        return self.browse()
+
+    get_default = get_singleton
 
 
 class McpServerModelRule(models.Model):

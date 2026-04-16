@@ -8,7 +8,12 @@ from . import authz, errors, introspect
 
 
 def _cfg(env):
-    return env["mcp.server.config"].sudo().get_singleton()
+    cfg = env["mcp.server.config"].sudo().get_singleton()
+    if not cfg:
+        raise errors.AuthzDenied(
+            "No MCP configuration found for this user."
+        )
+    return cfg
 
 
 def _normalize_fields(fields: List[str]) -> List[str]:
