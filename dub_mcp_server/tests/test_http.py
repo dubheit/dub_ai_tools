@@ -5,7 +5,11 @@ from odoo.tests.common import TransactionCase, tagged
 class TestMcpModels(TransactionCase):
     """Basic MCP model tests"""
 
-    def test_mcp_config_exists(self):
-        """Test that MCP config model is available"""
-        config = self.env["mcp.server.config"].get_singleton()
+    def test_mcp_config_model_available(self):
+        """Test that MCP config model is available and can be created"""
+        config = self.env["mcp.server.config"].create({
+            "name": "Test Config",
+            "active": True,
+        })
         self.assertTrue(config)
+        self.assertTrue(config.active)
