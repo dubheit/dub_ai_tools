@@ -1,5 +1,5 @@
 # Copyright 2025 Dubhe Srls
-# License OPL-1
+# License LGPL-3
 """
 Custom FastAPI dependencies for MCP authentication.
 Uses OAuth2 tokens from dub_oauth2_provider.

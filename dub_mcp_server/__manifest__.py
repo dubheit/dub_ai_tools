@@ -24,9 +24,7 @@
     "category": "Tools",
     "author": "Dubhe Srls",
     "website": "https://dubhe.it",
-    "license": "OPL-1",
-    "price": 79,
-    "currency": "EUR",
+    "license": "LGPL-3",
     "depends": ["base", "fastapi", "dub_oauth2_provider"],
     "data": [
         "security/security.xml",

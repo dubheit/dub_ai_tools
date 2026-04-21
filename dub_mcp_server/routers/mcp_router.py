@@ -1,5 +1,5 @@
 # Copyright 2025 Dubhe Srls
-# License OPL-1
+# License LGPL-3
 
 import logging
 from typing import Annotated, Any, Dict, List, Optional

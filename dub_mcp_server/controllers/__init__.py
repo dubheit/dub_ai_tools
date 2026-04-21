@@ -1,4 +1,4 @@
 # Copyright 2025 Dubhe Srls
-# License OPL-1
+# License LGPL-3
 
 from . import mcp_sse

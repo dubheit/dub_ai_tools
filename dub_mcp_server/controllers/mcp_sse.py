@@ -1,5 +1,5 @@
 # Copyright 2025 Dubhe Srls
-# License OPL-1
+# License LGPL-3
 
 """
 Native Odoo HTTP controller for MCP SSE endpoint.
