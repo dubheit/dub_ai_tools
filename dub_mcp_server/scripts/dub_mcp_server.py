@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2025 Dubhe Srls
-# License OPL-1
+# License LGPL-3
 """
 FastMCP Bridge for Odoo MCP Server.
 

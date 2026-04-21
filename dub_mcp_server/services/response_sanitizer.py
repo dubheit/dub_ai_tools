@@ -1,5 +1,5 @@
 # Copyright 2025 Dubhe Srls
-# License OPL-1
+# License LGPL-3
 
 """
 Response sanitization service for MCP SSE.
