@@ -118,9 +118,11 @@ class TestMCPConfig(TransactionCase):
         })
 
         # First two requests should pass
-        ratelimit.ensure_within_limit(ctx, self.env)
-        ratelimit.ensure_within_limit(ctx, self.env)
+        ratelimit.ensure_within_limit(ctx, self.env, config=self.mcp_config)
+        ratelimit.ensure_within_limit(ctx, self.env, config=self.mcp_config)
 
         # Third request should fail
         with self.assertRaises(RateLimited):
-            ratelimit.ensure_within_limit(ctx, self.env)
+            ratelimit.ensure_within_limit(
+                ctx, self.env, config=self.mcp_config
+            )
