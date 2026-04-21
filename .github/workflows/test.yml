@@ -31,12 +31,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: dub_ai_tools
 
       - name: Checkout dub_api_tools
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: dubheit/dub_api_tools
           ref: ${{ github.ref_name }}
@@ -44,21 +44,21 @@ jobs:
           token: ${{ secrets.GH_PAT }}
 
       - name: Checkout OCA/rest-framework
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: OCA/rest-framework
           ref: ${{ github.ref_name }}
           path: rest-framework
 
       - name: Checkout OCA/web-api
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: OCA/web-api
           ref: ${{ github.ref_name }}
           path: web-api
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
