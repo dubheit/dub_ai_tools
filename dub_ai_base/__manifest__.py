@@ -24,8 +24,8 @@ Features:
 - Dynamic model list with API sync
 - Manual model management
     """,
-    "author": "Dubhe",
-    "website": "https://www.dubhe.it",
+    "author": "Dubhe Srls",
+    "website": "https://dubhe.it",
     "license": "LGPL-3",
     "depends": ["base_setup"],
     "data": [

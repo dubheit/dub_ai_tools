@@ -3,8 +3,8 @@
     "version": "19.0.1.0.0",
     "category": "Technical",
     "summary": "Google Gemini provider for AI Base (Pro, Flash)",
-    "author": "Dubhe",
-    "website": "https://www.dubhe.it",
+    "author": "Dubhe Srls",
+    "website": "https://dubhe.it",
     "license": "LGPL-3",
     "depends": ["dub_ai_base"],
     "external_dependencies": {
