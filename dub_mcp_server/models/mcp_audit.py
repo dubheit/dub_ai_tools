@@ -24,12 +24,21 @@ class McpServerAudit(models.Model):
         [
             ("discover", "Discover"),
             ("read", "Read"),
+            ("read_resource", "Read Resource"),
             ("search", "Search"),
+            ("name_search", "Name Search"),
             ("create", "Create"),
             ("write", "Write"),
             ("unlink", "Unlink"),
             ("execute", "Execute"),
+            ("list_models", "List Models"),
+            ("list_fields", "List Fields"),
             ("list_methods", "List Methods"),
+            ("call_method", "Call Method"),
+            ("get_logs", "Get Logs"),
+            ("get_selection_values", "Get Selection Values"),
+            ("domain_validate", "Domain Validate"),
+            ("get_record_actions", "Get Record Actions"),
         ],
         required=True
     )
