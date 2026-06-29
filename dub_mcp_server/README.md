@@ -88,7 +88,8 @@ same access rules you configure in Odoo.
                            └──────────────────────────────────────┘
 ```
 
-The SSE endpoint `/mcp/sse` speaks the MCP JSON-RPC protocol. Every request
+The MCP endpoint is `/mcp` (with `/mcp/sse` kept as a backward-compatible
+alias for older clients). It speaks the MCP JSON-RPC protocol. Every request
 is authenticated via OAuth2, authorised against the MCP configuration bound
 to the user or to the client, rate-limited, then delegated to a tool handler
 that uses the Odoo ORM with the user's own permissions.
@@ -149,8 +150,10 @@ exposed by default**.
 Point your AI client at:
 
 ```
-https://your-odoo.example.com/mcp/sse
+https://your-odoo.example.com/mcp
 ```
+
+(`/mcp/sse` still works as a legacy alias.)
 
 and provide the OAuth2 client credentials. See
 [Connecting AI assistants](#connecting-ai-assistants) for per-tool snippets.
@@ -221,19 +224,23 @@ Add to `claude_desktop_config.json` (Desktop) or your Claude Code settings:
 {
   "mcpServers": {
     "odoo": {
-      "url": "https://your-odoo.example.com/mcp/sse",
-      "transport": "sse"
+      "url": "https://your-odoo.example.com/mcp",
+      "transport": "http"
     }
   }
 }
 ```
+
+`transport: "http"` selects Streamable HTTP (recommended; SSE is deprecated
+upstream). The legacy SSE setup (`"transport": "sse"` against `/mcp/sse`)
+still works for older clients.
 
 Claude supports Dynamic Client Registration. On first use it will open your
 browser for the consent page, then reuse the granted token.
 
 ### Cursor / Windsurf / Continue / Cline
 
-All follow the same pattern — point them at the `/mcp/sse` URL. Refer to
+All follow the same pattern — point them at the `/mcp` URL. Refer to
 your tool's MCP documentation for the exact config key.
 
 ### Custom Python client
@@ -293,7 +300,7 @@ Configurable per MCP configuration:
 - **Max requests** — requests allowed per window per `user_id`/`ip`
 
 The limit is enforced on **every transport** — native SSE, Streamable HTTP
-(`POST /mcp/sse`) and the REST API — using the configuration resolved from
+(`POST /mcp`) and the REST API — using the configuration resolved from
 the caller's token.
 
 The limiter is in-memory **per worker process** and resets on server
