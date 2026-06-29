@@ -21,10 +21,10 @@ _logger = logging.getLogger(__name__)
 # Active SSE sessions: session_id -> session_data
 #
 # NOTE (multi-worker): this dict lives in the worker process memory. With
-# multiple Odoo HTTP workers, an SSE stream (GET /mcp/sse) and the matching
+# multiple Odoo HTTP workers, an SSE stream (GET /mcp) and the matching
 # POST /mcp/message may land on different workers, so the session would not
 # be found. Deployments MUST enable sticky sessions (by sessionId / source
-# IP) on the reverse proxy. The Streamable HTTP transport (POST /mcp/sse) is
+# IP) on the reverse proxy. The Streamable HTTP transport (POST /mcp) is
 # stateless and not affected.
 _active_sessions = {}
 
@@ -58,7 +58,7 @@ class MCPSSENativeController(http.Controller):
     """Native SSE controller that bypasses FastAPI dispatcher buffering."""
 
     @http.route(
-        "/mcp/sse",
+        ["/mcp", "/mcp/sse"],
         type="http",
         auth="none",
         methods=["GET", "POST"],
@@ -67,8 +67,11 @@ class MCPSSENativeController(http.Controller):
     def mcp_sse(self, **kwargs):
         """
         MCP endpoint supporting both SSE and Streamable HTTP transports.
-        - GET: SSE transport (persistent connection with event stream)
-        - POST: Streamable HTTP transport (stateless request/response)
+        - POST: Streamable HTTP transport (stateless request/response) [canonical]
+        - GET: SSE transport (persistent connection with event stream) [legacy]
+
+        Canonical path is ``/mcp``; ``/mcp/sse`` is kept as a backward-compatible
+        alias for clients configured before the rename.
         """
         env = request.env
         auth_header = request.httprequest.headers.get("Authorization", "")
@@ -86,7 +89,8 @@ class MCPSSENativeController(http.Controller):
                 "name": "Dubhe MCP Server",
                 "version": "1.0.0",
                 "protocol": "MCP over SSE and Streamable HTTP",
-                "endpoint": "/mcp/sse",
+                "endpoint": "/mcp",
+                "endpoint_legacy": "/mcp/sse",
                 "message_endpoint": "/mcp/message",
             })
 
