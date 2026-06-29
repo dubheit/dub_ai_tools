@@ -4,9 +4,11 @@
 from dataclasses import dataclass
 from typing import Any, List, Optional
 
-from . import errors
+from . import errors, security
 
-DENYLIST_ALWAYS = {"password", "token", "secret"}
+# Re-exported for backward compatibility. Single source of truth lives
+# in services.security.
+DENYLIST_ALWAYS = security.DENYLIST_ALWAYS
 
 
 @dataclass
@@ -15,16 +17,39 @@ class AuthContext:
     user_id: int
     login: str
     ip: str
+    token: Optional[str] = None
 
 
-def _get_config(env):
-    """Get MCP server configuration."""
-    return env["mcp.server.config"].sudo().get_singleton()
+def resolve_config(env, ctx: Optional["AuthContext"] = None):
+    """Resolve the MCP config for the authenticated principal.
+
+    Mirrors the native SSE path: prefer the access token (user > client),
+    then fall back to the authenticated user id (covers personal tokens,
+    whose config is user-linked). Deny by default (empty recordset).
+    """
+    Config = env["mcp.server.config"].sudo()
+    token = getattr(ctx, "token", None) if ctx else None
+    if token:
+        cfg = Config.get_by_access_token(token)
+        if cfg:
+            return cfg
+    # get_by_user is a 19.0 feature (per-user config). On 18.0 the model has
+    # no user-linked config, so fall back to deny-by-default after the token
+    # lookup above.
+    user_id = getattr(ctx, "user_id", None) if ctx else None
+    if user_id and hasattr(Config, "get_by_user"):
+        return Config.get_by_user(user_id)
+    return Config.browse()
+
+
+def _get_config(env, ctx: Optional["AuthContext"] = None):
+    """Get MCP server configuration for the current request."""
+    return resolve_config(env, ctx)
 
 
 def ensure_enabled(ctx: AuthContext, env):
     """Check if MCP Server is enabled."""
-    cfg = _get_config(env)
+    cfg = _get_config(env, ctx)
     if not cfg:
         raise errors.AuthzDenied(
             "No MCP configuration found for this user."
@@ -37,7 +62,7 @@ def ensure_enabled(ctx: AuthContext, env):
 
 def check_operation(ctx: AuthContext, model: str, op: str, env):
     """Check if operation is allowed on model."""
-    cfg = _get_config(env)
+    cfg = _get_config(env, ctx)
     if not cfg:
         raise errors.AuthzDenied(
             "No MCP configuration found for this user."
@@ -62,14 +87,9 @@ def check_operation(ctx: AuthContext, model: str, op: str, env):
 
 def apply_field_denylist(fields: List[str], rule) -> List[str]:
     """Filter out denied fields from field list."""
-    deny = {
-        f.strip()
-        for f in (rule.field_denylist or "").split(",")
-        if f.strip()
-    }
-    deny |= DENYLIST_ALWAYS
     if not fields:
         return fields
+    deny = security.denied_fields(rule)
     return [f for f in fields if f not in deny]
 
 
@@ -81,7 +101,8 @@ def audit(
     env,
     request_excerpt: Any = None,
     record_ids: Optional[List[int]] = None,
-    error_excerpt: Optional[str] = None
+    error_excerpt: Optional[str] = None,
+    transport: str = "rest"
 ):
     """Create audit log entry."""
     excerpt = request_excerpt
@@ -98,7 +119,7 @@ def audit(
     env["mcp.server.audit"].sudo().create({
         "user_id": ctx.user_id,
         "ip_address": ctx.ip,
-        "transport": "http",
+        "transport": transport,
         "operation": operation,
         "model_name": model or "",
         "record_ids": rec_ids,

@@ -48,6 +48,17 @@ class McpServerConfig(models.Model):
     rate_limit_window_s = fields.Integer(default=60)
     rate_limit_max_requests = fields.Integer(default=120)
 
+    # Max duration of a single SSE connection before asking the client to
+    # reconnect. Must stay below Odoo's limit_time_real (odoo.conf) to avoid
+    # the worker killing the request mid-stream.
+    sse_max_duration_s = fields.Integer(
+        string="SSE Max Duration (s)",
+        default=900,
+        help="Maximum lifetime of an SSE connection in seconds. The client "
+             "is asked to reconnect when reached. Keep it below the Odoo "
+             "limit_time_real worker timeout."
+    )
+
     # Audit logging
     enable_audit_log = fields.Boolean(
         string="Enable Audit Log",
@@ -262,6 +273,12 @@ class McpModelMethod(models.Model):
         """
         Discover callable methods on an Odoo model.
         Returns list of method info dicts.
+
+        SECURITY: this is a *discovery* heuristic only (dir() + a blacklist
+        of dangerous names) used to populate the admin UI. It does NOT gate
+        execution. The real gate is the per-rule whitelist
+        ``allowed_method_ids``: only methods explicitly enabled there can be
+        invoked via MCP. Heuristic gaps here cannot widen what is callable.
         """
         if model_name not in self.env:
             return []

@@ -11,6 +11,8 @@ import logging
 from odoo import models
 from odoo.api import Environment
 
+from . import security
+
 _logger = logging.getLogger(__name__)
 
 
@@ -469,8 +471,8 @@ def _audit(
 
         env["mcp.server.audit"].sudo().create({
             "user_id": user_id,
-            "ip_address": "",
-            "transport": "http",
+            "ip_address": env.context.get("mcp_client_ip", ""),
+            "transport": env.context.get("mcp_transport", "http"),
             "operation": operation,
             "model_name": model or "",
             "record_ids": rec_ids,
@@ -520,12 +522,12 @@ def _check_permission(
 
 
 def _filter_fields(rule, fields_list: list, record_data: dict) -> dict:
-    """Filter out denied fields from record data"""
-    if not rule or not rule.field_denylist:
-        return record_data
+    """Filter out denied fields from record data.
 
-    denied = {f.strip() for f in rule.field_denylist.split(",") if f.strip()}
-    return {k: v for k, v in record_data.items() if k not in denied}
+    Always-denied fields (password, api_key, token, secret) are dropped
+    even when the rule has no per-rule field_denylist set.
+    """
+    return security.filter_denied(rule, record_data)
 
 
 def _apply_domain_restriction(rule, domain: list) -> list:
@@ -645,7 +647,8 @@ def _build_result(result_str: str, tracking_info: list, return_tracking: bool):
 
 def execute_tool(
     env: Environment, tool_name: str, arguments: dict,
-    config=None, user_id=None, return_tracking_info: bool = False
+    config=None, user_id=None, return_tracking_info: bool = False,
+    transport: str = "streamable_http", client_ip: str = ""
 ):
     """
     Execute an MCP tool and return the result as string.
@@ -672,6 +675,13 @@ def execute_tool(
             _logger.warning(
                 "No user_id provided, using env.user=%s", env.user.id
             )
+
+        # Carry transport/client ip for audit logging (read in _audit).
+        env = env(context=dict(
+            env.context or {},
+            mcp_transport=transport,
+            mcp_client_ip=client_ip,
+        ))
 
         if not config:
             config = env["mcp.server.config"].sudo().get_singleton()
@@ -727,10 +737,10 @@ def execute_tool(
             if not fields_info:
                 return _build_result(f"No fields found for model {model}", [], return_tracking_info)
 
-            # Filter out denied fields
+            # Filter out denied fields (per-rule + always-denylist)
             rule = _get_model_rule(config, model)
-            if rule and rule.field_denylist:
-                denied = {f.strip() for f in rule.field_denylist.split(",") if f.strip()}
+            denied = security.denied_fields(rule)
+            if denied:
                 fields_info = {k: v for k, v in fields_info.items() if k not in denied}
 
             result = f"Fields for {model} ({len(fields_info)} fields):\n\n"
@@ -1423,12 +1433,10 @@ def execute_tool(
             if not allowed:
                 return _build_result(f"Access denied: {error}", [], return_tracking_info)
 
-            # Check field denylist
+            # Check field denylist (per-rule + always-denylist)
             rule = _get_model_rule(config, model)
-            if rule and rule.field_denylist:
-                denied = {f.strip() for f in rule.field_denylist.split(",") if f.strip()}
-                if field in denied:
-                    return _build_result(f"Access denied: field '{field}' is restricted", [], return_tracking_info)
+            if field in security.denied_fields(rule):
+                return _build_result(f"Access denied: field '{field}' is restricted", [], return_tracking_info)
 
             fields_info = env[model].fields_get([field], attributes=["type", "selection", "string"])
             if field not in fields_info:

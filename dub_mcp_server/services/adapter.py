@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Tuple
 from . import authz, errors, introspect
 
 
-def _cfg(env):
-    cfg = env["mcp.server.config"].sudo().get_singleton()
+def _cfg(env, ctx=None):
+    cfg = authz.resolve_config(env, ctx)
     if not cfg:
         raise errors.AuthzDenied(
             "No MCP configuration found for this user."
@@ -34,7 +34,7 @@ def _sanitize_order(order: str, model: str) -> str:
 
 
 def list_models(ctx, env) -> Dict[str, Any]:
-    cfg = _cfg(env)
+    cfg = _cfg(env, ctx)
     domain = [("config_id", "=", cfg.id)]
     rules = env["mcp.server.model.rule"].sudo().search(domain)
     out = {"models": []}
@@ -85,8 +85,9 @@ def search_read(
     raw_fields = data.get("fields") or []
     filtered = authz.apply_field_denylist(raw_fields, rule)
     fields = _normalize_fields(filtered)
-    limit = data.get("limit") or _cfg(env).default_page_size
-    max_ps = _cfg(env).max_page_size or 200
+    cfg = _cfg(env, ctx)
+    limit = data.get("limit") or cfg.default_page_size
+    max_ps = cfg.max_page_size or 200
     limit_cap = min(max(1, limit), max_ps)
     offset = max(0, int(data.get("offset") or 0))
     order = _sanitize_order(data.get("order") or "", model)

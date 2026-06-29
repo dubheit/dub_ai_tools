@@ -19,6 +19,13 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 # Active SSE sessions: session_id -> session_data
+#
+# NOTE (multi-worker): this dict lives in the worker process memory. With
+# multiple Odoo HTTP workers, an SSE stream (GET /mcp/sse) and the matching
+# POST /mcp/message may land on different workers, so the session would not
+# be found. Deployments MUST enable sticky sessions (by sessionId / source
+# IP) on the reverse proxy. The Streamable HTTP transport (POST /mcp/sse) is
+# stateless and not affected.
 _active_sessions = {}
 
 # Maximum SSE session duration in seconds (must be < limit_time_real in odoo.conf)
@@ -111,6 +118,11 @@ class MCPSSENativeController(http.Controller):
         message_endpoint = f"{scheme}://{host}/mcp/message?sessionId={session_id}"
         _logger.info("MCP message endpoint URL: %s", message_endpoint)
 
+        # SSE lifetime: configurable per-config, fallback to module default.
+        max_duration = MAX_SSE_DURATION
+        if config and config.sse_max_duration_s:
+            max_duration = config.sse_max_duration_s
+
         def generate():
             """Generator for SSE events - yields bytes."""
             heartbeat_count = 0
@@ -128,10 +140,10 @@ class MCPSSENativeController(http.Controller):
                 while True:
                     # Check session timeout to avoid Odoo's limit_time_real
                     elapsed = time.time() - start_time
-                    if elapsed >= MAX_SSE_DURATION:
+                    if elapsed >= max_duration:
                         _logger.info(
                             "SSE session %s reached max duration (%ds), asking client to reconnect",
-                            session_id, MAX_SSE_DURATION
+                            session_id, max_duration
                         )
                         yield b"event: reconnect\ndata: timeout\n\n"
                         break
@@ -231,6 +243,7 @@ class MCPSSENativeController(http.Controller):
             config=config,
             user_id=session["user_id"],
             session_id=sessionId,
+            transport="sse",
         )
 
         # Put response in queue for SSE stream
@@ -238,7 +251,16 @@ class MCPSSENativeController(http.Controller):
 
         return request.make_json_response({"status": "accepted"}, status=202)
 
-    def _handle_mcp_request(self, env, request_data, config=None, user_id=None, session_id=None):
+    def _client_ip(self):
+        """Best-effort real client IP for rate limiting / audit."""
+        headers = request.httprequest.headers
+        fwd = headers.get("X-Forwarded-For")
+        if fwd:
+            return fwd.split(",")[0].strip()
+        return headers.get("X-Real-IP") or request.httprequest.remote_addr or ""
+
+    def _handle_mcp_request(self, env, request_data, config=None, user_id=None,
+                            session_id=None, transport="streamable_http"):
         """Handle MCP JSON-RPC request."""
         method = request_data.get("method", "")
         params = request_data.get("params", {})
@@ -251,6 +273,16 @@ class MCPSSENativeController(http.Controller):
                 company_name = company.name if company.exists() else "Unknown"
                 base_url = env["ir.config_parameter"].sudo().get_param("web.base.url", "")
                 user_name = env.user.name if user_id else "Unknown"
+                # Echo the client's protocol version when we support it,
+                # otherwise advertise a recent revision (MCP spec behaviour).
+                supported_protocols = {
+                    "2024-11-05", "2025-03-26", "2025-06-18",
+                }
+                client_proto = params.get("protocolVersion")
+                protocol_version = (
+                    client_proto if client_proto in supported_protocols
+                    else "2025-06-18"
+                )
                 server_name = "Odoo MCP - %s (%s)" % (company_name, db_name)
                 instructions = (
                     "You are connected to the Odoo instance '%s' "
@@ -264,7 +296,7 @@ class MCPSSENativeController(http.Controller):
                     "jsonrpc": "2.0",
                     "id": req_id,
                     "result": {
-                        "protocolVersion": "2024-11-05",
+                        "protocolVersion": protocol_version,
                         "capabilities": {
                             "tools": {"listChanged": False},
                             "resources": {"listChanged": False},
@@ -288,13 +320,33 @@ class MCPSSENativeController(http.Controller):
             elif method == "tools/call":
                 from ..services.mcp_tools import execute_tool
                 from ..services.context_tracker import get_tracker
+                from ..services import authz, ratelimit
+                from ..services.errors import RateLimited
+
+                # Rate limit the live transport (per user+ip), using the
+                # already-resolved config from the token.
+                if config:
+                    rl_ctx = authz.AuthContext(
+                        user_id=user_id, login="", ip=self._client_ip()
+                    )
+                    try:
+                        ratelimit.ensure_within_limit(
+                            rl_ctx, env, config=config
+                        )
+                    except RateLimited as e:
+                        return {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "error": {"code": -32000, "message": str(e)},
+                        }
 
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
                 result, tracking_info = execute_tool(
                     env, tool_name, arguments,
                     config=config, user_id=user_id,
-                    return_tracking_info=True
+                    return_tracking_info=True,
+                    transport=transport, client_ip=self._client_ip()
                 )
 
                 # Update context tracking if session is active
