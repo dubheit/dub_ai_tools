@@ -13,11 +13,22 @@ from odoo.addons.fastapi.dependencies import odoo_env
 
 from ..services import adapter, authz, errors, ratelimit, validate
 from . import methods_handler
-from .dependencies import require_oauth2_user
+from .dependencies import get_bearer_token, require_oauth2_user
 
 _logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["mcp"])
+
+
+def _auth_ctx(request: Request, env) -> "authz.AuthContext":
+    """Build the auth context, carrying the bearer token so the MCP
+    config can be resolved per-principal (deny-by-default otherwise)."""
+    return authz.AuthContext(
+        user_id=env.user.id,
+        login=env.user.login,
+        ip=_get_client_ip(request),
+        token=get_bearer_token(request),
+    )
 
 
 def _get_client_ip(request: Request) -> str:
@@ -131,11 +142,7 @@ async def list_models(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """List available models"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     try:
         authz.ensure_enabled(ctx, env)
@@ -162,11 +169,7 @@ async def search_read(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """Search and read records"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
 
@@ -196,11 +199,7 @@ async def read(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """Read records by IDs"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
 
@@ -231,11 +230,7 @@ async def create(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """Create a new record"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
 
@@ -266,11 +261,7 @@ async def write(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """Update existing records"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
 
@@ -301,11 +292,7 @@ async def unlink(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """Delete records"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
 
@@ -336,11 +323,7 @@ async def list_methods(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """List available methods for a model with descriptions."""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
     model_name = data.get("model")
@@ -432,11 +415,7 @@ async def execute_method(
     env: Annotated[Environment, Depends(require_oauth2_user)]
 ) -> McpResponse:
     """Execute a method on specific records"""
-    ctx = authz.AuthContext(
-        user_id=env.user.id,
-        login=env.user.login,
-        ip=_get_client_ip(request)
-    )
+    ctx = _auth_ctx(request, env)
 
     data = request_data.model_dump()
     model_name = data.get("model")

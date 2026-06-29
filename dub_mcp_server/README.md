@@ -93,6 +93,13 @@ is authenticated via OAuth2, authorised against the MCP configuration bound
 to the user or to the client, rate-limited, then delegated to a tool handler
 that uses the Odoo ORM with the user's own permissions.
 
+The same endpoint also accepts the **Streamable HTTP** transport: a `POST`
+returns a single `application/json` response (pure stateless, no
+`Mcp-Session-Id`, no server-initiated streaming). This is sufficient for the
+CRUD-style tools exposed here; the persistent SSE `GET` stream is used for
+server-pushed messages. On `initialize` the server echoes the client's
+`protocolVersion` when supported, otherwise advertises a recent revision.
+
 ## Quick start
 
 ### 1. Install dependencies
@@ -153,14 +160,23 @@ and provide the OAuth2 client credentials. See
 | Tool | Purpose |
 |------|---------|
 | `list_models` | List all models the caller is allowed to use and the operations permitted on each |
+| `list_fields` | Describe the fields of a model (type, label, required/readonly), denied fields hidden |
 | `search` | Search records using an Odoo domain; pagination, sort and field selection supported |
 | `read` | Read records by IDs with field filtering |
 | `create` | Create a record (subject to `allow_create`) |
 | `update` | Update records by IDs (subject to `allow_write`) |
 | `delete` | Delete records by IDs (subject to `allow_unlink`) |
+| `name_search` | Resolve records by display name (typeahead-style lookup) |
+| `get_selection_values` | List the values/labels of a selection field |
+| `domain_validate` | Validate an Odoo domain against a model without executing it |
+| `get_record_actions` | List the actions available on a record |
 | `list_methods` | Discover whitelisted methods of a model |
 | `call_method` | Call a whitelisted method with positional or keyword arguments |
 | `get_logs` *(optional)* | Tail recent Odoo logs for debugging (requires `allow_logs_tool`) |
+
+Denied fields (per-rule `field_denylist` plus the always-denied
+`password, api_key, token, secret`) are stripped from every tool response,
+on both the MCP and REST transports.
 
 ## REST API
 
@@ -276,9 +292,17 @@ Configurable per MCP configuration:
 - **Window** (seconds) — sliding window size
 - **Max requests** — requests allowed per window per `user_id`/`ip`
 
-The limiter is in-memory and resets on server restart. For multi-worker
-deployments behind a load balancer, consider an external limiter in front of
-Odoo.
+The limit is enforced on **every transport** — native SSE, Streamable HTTP
+(`POST /mcp/sse`) and the REST API — using the configuration resolved from
+the caller's token.
+
+The limiter is in-memory **per worker process** and resets on server
+restart. With multiple Odoo workers the effective ceiling is up to
+`workers × max_requests`; for strict enforcement put a limiter on the
+reverse proxy or move the counters to a shared store. Likewise, native SSE
+streams keep their session in worker memory, so multi-worker deployments
+**must** enable sticky sessions (by `sessionId`/source IP) on the proxy. The
+Streamable HTTP transport is stateless and needs no stickiness.
 
 ## Audit log
 

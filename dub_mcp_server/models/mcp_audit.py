@@ -17,7 +17,13 @@ class McpServerAudit(models.Model):
     user_id = fields.Many2one("res.users", ondelete="set null")
     ip_address = fields.Char()
     transport = fields.Selection(
-        [("stdio", "Stdio"), ("http", "HTTP")],
+        [
+            ("stdio", "Stdio"),
+            ("http", "HTTP"),
+            ("sse", "SSE"),
+            ("streamable_http", "Streamable HTTP"),
+            ("rest", "REST"),
+        ],
         default="http"
     )
     operation = fields.Selection(
