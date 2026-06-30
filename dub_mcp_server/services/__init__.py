@@ -2,6 +2,7 @@ from . import (
     adapter,
     authz,
     context_tracker,
+    elicitation,
     errors,
     introspect,
     log_buffer,

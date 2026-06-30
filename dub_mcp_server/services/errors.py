@@ -66,3 +66,14 @@ class Timeout(McpError):
 
 class PayloadTooLarge(McpError):
     code = "PAYLOAD_TOO_LARGE"
+
+
+class UrlElicitationRequired(Exception):
+    """Raised by a tool when it needs the user to complete a URL-mode
+    elicitation before the call can proceed (MCP 2025-11-25, JSON-RPC -32042).
+
+    Carries the list of elicitation dicts to return in the error data.
+    """
+    def __init__(self, elicitations):
+        super().__init__("URL elicitation required")
+        self.elicitations = elicitations

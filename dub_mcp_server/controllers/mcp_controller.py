@@ -290,6 +290,63 @@ class MCPController(http.Controller):
 
         return request.make_json_response({"status": "accepted"}, status=202)
 
+    @http.route(
+        "/mcp/elicitation/<string:elicitation_id>",
+        type="http", auth="user", methods=["GET", "POST"], csrf=False,
+    )
+    def mcp_elicitation_page(self, elicitation_id, **kwargs):
+        """URL-mode elicitation web page (MCP 2025-11-25).
+
+        Served to the user's browser. auth='user' forces an Odoo login, and we
+        require the logged-in user to be the one the elicitation was created
+        for (anti-phishing). On submit, the value is stored bound to the user
+        and the client can retry the original tools/call.
+        """
+        env = request.env
+        elic = env["mcp.server.elicitation"].sudo().search(
+            [("elicitation_id", "=", elicitation_id)], limit=1
+        )
+        if not elic:
+            return request.make_response("Elicitation not found.", status=404)
+        # Anti-phishing: only the elicitation's own user may complete it.
+        if env.user.id != elic.user_id.id:
+            return request.make_response(
+                "This request was created for another user.", status=403
+            )
+        if elic.status != "pending":
+            return request.make_response(
+                self._elic_html("Already %s. You can return to your assistant."
+                                % elic.status),
+            )
+        if elic.expiry and elic.expiry < fields.Datetime.now():
+            return request.make_response(self._elic_html("This request expired."))
+        if request.httprequest.method == "POST":
+            value = (request.params.get("value") or "").strip()
+            if value:
+                elic.write({"status": "completed", "value": value})
+                return request.make_response(self._elic_html(
+                    "Saved. Return to your assistant and retry the action."))
+        return request.make_response(self._elic_form(elic))
+
+    def _elic_html(self, msg):
+        return (
+            "<!doctype html><meta charset='utf-8'>"
+            "<title>MCP</title>"
+            "<div style='font-family:sans-serif;max-width:480px;margin:60px auto'>"
+            "<h3>MCP request</h3><p>%s</p></div>" % msg
+        )
+
+    def _elic_form(self, elic):
+        import html
+        msg = html.escape(elic.message or "Please provide the requested value.")
+        return self._elic_html(
+            "%s<form method='post' style='margin-top:16px'>"
+            "<input name='value' type='text' autofocus "
+            "style='width:100%%;padding:8px' placeholder='Value'/>"
+            "<button type='submit' style='margin-top:12px;padding:8px 16px'>"
+            "Submit</button></form>" % msg
+        )
+
     def _client_ip(self):
         """Best-effort real client IP for rate limiting / audit."""
         headers = request.httprequest.headers
@@ -350,7 +407,7 @@ class MCPController(http.Controller):
                 from ..services.mcp_tools import execute_tool
                 from ..services.context_tracker import get_tracker
                 from ..services import authz, ratelimit
-                from ..services.errors import RateLimited
+                from ..services.errors import RateLimited, UrlElicitationRequired
 
                 # Rate limit the live transport (per user+ip), using the
                 # already-resolved config from the token.
@@ -408,12 +465,22 @@ class MCPController(http.Controller):
                                   "message": "Tool requires task augmentation"},
                     }
 
-                result, tracking_info = execute_tool(
-                    env, tool_name, arguments,
-                    config=config, user_id=user_id,
-                    return_tracking_info=True,
-                    transport=transport, client_ip=self._client_ip()
-                )
+                try:
+                    result, tracking_info = execute_tool(
+                        env, tool_name, arguments,
+                        config=config, user_id=user_id,
+                        return_tracking_info=True,
+                        transport=transport, client_ip=self._client_ip()
+                    )
+                except UrlElicitationRequired as e:
+                    return {
+                        "jsonrpc": "2.0", "id": req_id,
+                        "error": {
+                            "code": -32042,
+                            "message": "This request requires more information.",
+                            "data": {"elicitations": e.elicitations},
+                        },
+                    }
 
                 # Update context tracking if session is active
                 if session_id and tracking_info:
