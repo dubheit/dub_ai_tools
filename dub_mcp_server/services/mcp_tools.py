@@ -12,6 +12,7 @@ from odoo import models
 from odoo.api import Environment
 
 from . import security
+from .errors import UrlElicitationRequired
 
 _logger = logging.getLogger(__name__)
 
@@ -442,6 +443,17 @@ def get_tools_list(env: Environment, config=None) -> list:
                 "required": []
             }
         })
+
+    tools.append({
+        "name": "demo_external",
+        "description": (
+            "Demo of URL-mode elicitation: pretends to call an external API "
+            "using your stored secret. If the secret is not set yet, it "
+            "triggers a URL elicitation so you can provide it via a secure "
+            "Odoo web page, then retry."
+        ),
+        "inputSchema": {"type": "object", "additionalProperties": False},
+    })
 
     icons = mcp_icons(env)
     for tool in tools:
@@ -1560,9 +1572,29 @@ def execute_tool(
                 env, uri, config=config, user_id=user_id)
             return _build_result(content, [], return_tracking_info)
 
+        elif tool_name == "demo_external":
+            from .elicitation import (
+                create_url_elicitation, get_completed_value,
+            )
+            val = get_completed_value(env, user_id, "demo_secret")
+            if not val:
+                elic = create_url_elicitation(
+                    env, user_id, "demo_secret",
+                    "Provide your demo secret to continue."
+                )
+                raise UrlElicitationRequired([elic])
+            return _build_result(
+                "External call OK using your stored secret: %s****"
+                % (val[:2],),
+                [], return_tracking_info
+            )
+
         else:
             return _build_result(f"Unknown tool: {tool_name}", [], return_tracking_info)
 
+    except UrlElicitationRequired:
+        # Propagate to the controller, which returns JSON-RPC -32042.
+        raise
     except Exception as e:
         # Log the full error internally, return sanitized message
         _logger.exception("MCP tool execution error")
