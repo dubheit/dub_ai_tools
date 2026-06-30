@@ -14,10 +14,13 @@ from urllib.parse import urlparse
 
 from werkzeug.wrappers import Response
 
-from odoo import http
+from odoo import fields, http
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
+
+# Terminal MCP task statuses
+TERMINAL_STATUSES = ("completed", "failed", "cancelled")
 
 # Active SSE sessions: session_id -> session_data
 #
@@ -322,6 +325,11 @@ class MCPController(http.Controller):
                         "capabilities": {
                             "tools": {"listChanged": False},
                             "resources": {"listChanged": False},
+                            "tasks": {
+                                "list": {},
+                                "cancel": {},
+                                "requests": {"tools": {"call": {}}},
+                            },
                         },
                         "serverInfo": {
                             "name": "Dubhe MCP Server",
@@ -363,6 +371,43 @@ class MCPController(http.Controller):
 
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
+
+                # Task augmentation (MCP 2025-11-25): if the client wraps the
+                # call with a 'task' field and the tool supports it, create a
+                # durable task and return a CreateTaskResult instead of running
+                # inline.
+                from ..services.mcp_tools import tool_task_support
+                support = tool_task_support(tool_name)
+                task_param = params.get("task")
+                if task_param is not None:
+                    if support == "forbidden":
+                        return {
+                            "jsonrpc": "2.0", "id": req_id,
+                            "error": {"code": -32601,
+                                      "message": "Tool does not support task augmentation"},
+                        }
+                    if not config:
+                        return {
+                            "jsonrpc": "2.0", "id": req_id,
+                            "error": {"code": -32603,
+                                      "message": "No MCP configuration for this user"},
+                        }
+                    ttl = task_param.get("ttl") if isinstance(task_param, dict) else None
+                    task = env["mcp.server.task"].sudo().create_task(
+                        user_id, tool_name, arguments, config=config,
+                        transport=transport, ttl_ms=ttl,
+                    )
+                    return {
+                        "jsonrpc": "2.0", "id": req_id,
+                        "result": {"task": task.to_task_dict()},
+                    }
+                if support == "required":
+                    return {
+                        "jsonrpc": "2.0", "id": req_id,
+                        "error": {"code": -32601,
+                                  "message": "Tool requires task augmentation"},
+                    }
+
                 result, tracking_info = execute_tool(
                     env, tool_name, arguments,
                     config=config, user_id=user_id,
@@ -423,6 +468,10 @@ class MCPController(http.Controller):
                     },
                 }
 
+            elif method in ("tasks/get", "tasks/result", "tasks/cancel",
+                            "tasks/list"):
+                return self._handle_tasks(env, method, params, req_id, user_id)
+
             elif method == "ping":
                 return {"jsonrpc": "2.0", "id": req_id, "result": {}}
 
@@ -440,6 +489,67 @@ class MCPController(http.Controller):
                 "id": req_id,
                 "error": {"code": -32603, "message": "Internal server error"}
             }
+
+    def _handle_tasks(self, env, method, params, req_id, user_id):
+        """tasks/get | tasks/result | tasks/cancel | tasks/list (MCP tasks).
+
+        Tasks are bound to the authenticated user: get/result/cancel/list only
+        touch tasks owned by that user (spec security requirement).
+        """
+        import time as _time
+
+        def err(code, msg):
+            return {"jsonrpc": "2.0", "id": req_id,
+                    "error": {"code": code, "message": msg}}
+
+        Task = env["mcp.server.task"].sudo()
+
+        if method == "tasks/list":
+            tasks = Task.search(
+                [("user_id", "=", user_id)], limit=50, order="create_date desc"
+            )
+            return {"jsonrpc": "2.0", "id": req_id,
+                    "result": {"tasks": [t.to_task_dict() for t in tasks]}}
+
+        task_id = params.get("taskId")
+        if not task_id:
+            return err(-32602, "taskId is required")
+        task = Task.search(
+            [("task_id", "=", task_id), ("user_id", "=", user_id)], limit=1
+        )
+        if not task:
+            return err(-32602, "Failed to retrieve task: Task not found")
+
+        if method == "tasks/get":
+            return {"jsonrpc": "2.0", "id": req_id,
+                    "result": task.to_task_dict()}
+
+        if method == "tasks/cancel":
+            if task.status in TERMINAL_STATUSES:
+                return err(-32602,
+                           "Cannot cancel task: already in terminal status "
+                           "'%s'" % task.status)
+            task.write({"status": "cancelled",
+                        "status_message": "The task was cancelled by request.",
+                        "last_updated_at": fields.Datetime.now()})
+            return {"jsonrpc": "2.0", "id": req_id,
+                    "result": task.to_task_dict()}
+
+        if method == "tasks/result":
+            # Spec: block until terminal. Bounded wait to avoid holding the
+            # worker too long; conformant clients poll tasks/get first and call
+            # tasks/result once completed, so this rarely waits.
+            deadline = _time.time() + 5
+            while task.status not in TERMINAL_STATUSES and _time.time() < deadline:
+                _time.sleep(1)
+                task.invalidate_recordset(["status"])
+            if task.status in TERMINAL_STATUSES:
+                return {"jsonrpc": "2.0", "id": req_id,
+                        "result": task.to_call_tool_result()}
+            return err(-32603,
+                       "Task not terminal yet; keep polling tasks/get")
+
+        return err(-32601, "Method not found: %s" % method)
 
     def _handle_streamable_http(self, env, auth_header):
         """

@@ -9,4 +9,24 @@
         <field name="interval_type">days</field>
         <field name="active">True</field>
     </record>
+
+    <record id="ir_cron_mcp_task_run" model="ir.cron">
+        <field name="name">MCP: Run Pending Tasks</field>
+        <field name="model_id" ref="model_mcp_server_task"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_run_pending()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="ir_cron_mcp_task_cleanup" model="ir.cron">
+        <field name="name">MCP: Cleanup Expired Tasks</field>
+        <field name="model_id" ref="model_mcp_server_task"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_cleanup_expired()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="active">True</field>
+    </record>
 </odoo>
