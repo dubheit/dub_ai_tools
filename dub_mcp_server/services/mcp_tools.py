@@ -39,6 +39,19 @@ def mcp_icons(env):
     }]
 
 
+# Tools that may be run as MCP tasks (execution.taskSupport, MCP 2025-11-25).
+# Default for unlisted tools is "forbidden".
+TASK_SUPPORT = {
+    "search": "optional",
+    "call_method": "optional",
+}
+
+
+def tool_task_support(name):
+    """Return the task support level for a tool: forbidden/optional/required."""
+    return TASK_SUPPORT.get(name, "forbidden")
+
+
 def get_tools_list(env: Environment, config=None) -> list:
     """Get list of available MCP tools"""
     tools = [
@@ -433,6 +446,9 @@ def get_tools_list(env: Environment, config=None) -> list:
     icons = mcp_icons(env)
     for tool in tools:
         tool.setdefault("icons", icons)
+        ts = TASK_SUPPORT.get(tool["name"])
+        if ts:
+            tool.setdefault("execution", {"taskSupport": ts})
     return tools
 
 
