@@ -21,6 +21,8 @@ Safe by default: every new connection is denied unless explicitly authorised.
 - [Architecture](#architecture)
 - [Quick start](#quick-start)
 - [Supported MCP tools](#supported-mcp-tools)
+- [Tasks (async execution)](#tasks-async-execution)
+- [Elicitation (URL mode)](#elicitation-url-mode)
 - [REST API](#rest-api)
 - [Connecting AI assistants](#connecting-ai-assistants)
 - [Permission model](#permission-model)
@@ -30,6 +32,7 @@ Safe by default: every new connection is denied unless explicitly authorised.
 - [Security notes](#security-notes)
 - [Dependencies](#dependencies)
 - [Development & tests](#development--tests)
+- [Roadmap](#roadmap)
 - [Support](#support)
 - [License](#license)
 
@@ -61,6 +64,13 @@ same access rules you configure in Odoo.
 - 📊 **Full audit log** — every call is recorded with status and excerpt
 - 🪵 **Optional `get_logs` tool** — let trusted AI clients fetch server logs
 - 🌐 **REST API** — drop-in alternative for non-MCP clients
+- 🧩 **Tasks** — durable async execution for long-running tool calls (MCP 2025-11-25)
+- 🪪 **URL-mode elicitation** — collect sensitive values via a secure Odoo web page
+- 🖼️ **Tool & resource icons** — richer client UI metadata
+
+This module targets **MCP protocol revision 2025-11-25** (it echoes the client's
+version on `initialize` and falls back to the latest it supports). The canonical
+endpoint is **`/mcp`** (the legacy `/mcp/sse` still works as an alias).
 
 ## Architecture
 
@@ -180,6 +190,42 @@ and provide the OAuth2 client credentials. See
 Denied fields (per-rule `field_denylist` plus the always-denied
 `password, api_key, token, secret`) are stripped from every tool response,
 on both the MCP and REST transports.
+
+Tools also expose `icons` metadata, and tools that may run long advertise
+`execution.taskSupport` (see Tasks below).
+
+## Tasks (async execution)
+
+For long-running tool calls the server supports **MCP tasks** (revision
+2025-11-25). A client augments a `tools/call` with a `task` field; the server
+stores a durable **`mcp.server.task`** (bound to the authenticated user, with a
+secure id and a TTL), returns a `CreateTaskResult` immediately, and the client
+polls `tasks/get` / `tasks/result` (also `tasks/list`, `tasks/cancel`).
+
+- Eligible tools declare `execution.taskSupport` (`optional`/`required`); the
+  rest default to `forbidden`. Currently `search` and `call_method` are
+  `optional`.
+- Execution is **asynchronous via `ir.cron`** (`_cron_run_pending`) with an
+  atomic claim, so a task runs exactly once. Expired tasks are purged by a cron.
+- Install the optional **`dub_mcp_async_task`** module (depends on OCA
+  `queue_job`) to run tasks immediately via queue_job instead of the cron.
+
+> Note: tasks are experimental in the MCP spec; not all clients use them yet.
+
+## Elicitation (URL mode)
+
+A tool can ask the user for an out-of-band value (e.g. a third-party secret)
+without exposing it to the AI client. The tool raises an elicitation; the server
+returns a JSON-RPC `-32042` error with a URL pointing to a secure Odoo web page
+(`/mcp/elicitation/<id>`). The user opens it (logged into Odoo — the page
+enforces that the logged-in user is the elicitation's owner, anti-phishing),
+submits the value (stored bound to their identity), then the client retries the
+original call.
+
+The `demo_external` tool demonstrates the full flow end to end.
+
+> Form-mode elicitation (server-initiated input *during* a call) is **not yet
+> implemented** — see [Roadmap](#roadmap).
 
 ## REST API
 
@@ -366,6 +412,25 @@ odoo -c odoo.conf -d test_db --test-tags /dub_mcp_server \
 CI runs on every push via GitHub Actions against PostgreSQL 16 and Python
 3.12, installing OCA `rest-framework` and `web-api` plus `dub_api_tools` as
 dependencies.
+
+## Roadmap
+
+Implemented from MCP 2025-11-25: canonical `/mcp` endpoint, Origin validation,
+tool/resource icons, tasks (cron + optional queue_job bridge), URL-mode
+elicitation.
+
+Not yet implemented:
+
+- **Form-mode elicitation** — server-initiated input *during* a tool call.
+  Requires a bidirectional channel (the Streamable HTTP POST is single-response):
+  the planned approach is via tasks `input_required` + an SSE stream on
+  `tasks/result`. Higher complexity/risk; deferred.
+- **OIDC discovery** and **OAuth Client ID Metadata Documents** — these live in
+  `dub_oauth2_provider`, not in this module.
+- **Sampling** — intentionally skipped (no real use case for a CRUD server).
+- **Multi-worker shared state** — SSE sessions and rate-limit counters are
+  per-process; use sticky sessions / a proxy-side limiter, or move to a shared
+  store (documented in [Rate limiting](#rate-limiting)).
 
 ## Support
 
