@@ -26,6 +26,19 @@ def create_mcp_response(id, result=None, error=None) -> dict:
     return response
 
 
+def mcp_icons(env):
+    """Icons metadata (MCP 2025-11-25) for tools/resources.
+
+    Points to the module icon served by Odoo as a static asset.
+    """
+    base_url = env["ir.config_parameter"].sudo().get_param("web.base.url", "")
+    return [{
+        "src": "%s/dub_mcp_server/static/description/icon.png" % base_url,
+        "mimeType": "image/png",
+        "sizes": ["128x128"],
+    }]
+
+
 def get_tools_list(env: Environment, config=None) -> list:
     """Get list of available MCP tools"""
     tools = [
@@ -417,6 +430,9 @@ def get_tools_list(env: Environment, config=None) -> list:
             }
         })
 
+    icons = mcp_icons(env)
+    for tool in tools:
+        tool.setdefault("icons", icons)
     return tools
 
 

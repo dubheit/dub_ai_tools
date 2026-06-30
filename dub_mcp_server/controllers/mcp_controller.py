@@ -10,6 +10,7 @@ import logging
 import secrets
 import time
 from queue import Queue, Empty
+from urllib.parse import urlparse
 
 from werkzeug.wrappers import Response
 
@@ -54,8 +55,31 @@ def get_config_and_user(env, auth_header):
     return None, None
 
 
-class MCPSSENativeController(http.Controller):
-    """Native SSE controller that bypasses FastAPI dispatcher buffering."""
+class MCPController(http.Controller):
+    """MCP transport controller (SSE + Streamable HTTP), native Odoo HTTP,
+    bypassing the FastAPI dispatcher buffering."""
+
+    def _origin_allowed(self, env):
+        """Validate the Origin header (anti DNS-rebinding) per MCP spec.
+
+        Browser-less MCP clients (Claude Code/Desktop, API) send no Origin
+        and are allowed. A present Origin is allowed only if same-origin,
+        localhost, or listed in the ``mcp.allowed_origins`` system parameter
+        (comma-separated origins or hostnames). Otherwise the caller must
+        get HTTP 403.
+        """
+        origin = request.httprequest.headers.get("Origin")
+        if not origin:
+            return True
+        host = (request.httprequest.host or "").split(":")[0]
+        parsed = urlparse(origin)
+        if parsed.hostname in (host, "localhost", "127.0.0.1"):
+            return True
+        allowed = env["ir.config_parameter"].sudo().get_param(
+            "mcp.allowed_origins", ""
+        )
+        allow = {a.strip() for a in allowed.split(",") if a.strip()}
+        return origin in allow or (parsed.hostname and parsed.hostname in allow)
 
     @http.route(
         ["/mcp", "/mcp/sse"],
@@ -64,7 +88,7 @@ class MCPSSENativeController(http.Controller):
         methods=["GET", "POST"],
         csrf=False,
     )
-    def mcp_sse(self, **kwargs):
+    def mcp_endpoint(self, **kwargs):
         """
         MCP endpoint supporting both SSE and Streamable HTTP transports.
         - POST: Streamable HTTP transport (stateless request/response) [canonical]
@@ -74,6 +98,10 @@ class MCPSSENativeController(http.Controller):
         alias for clients configured before the rename.
         """
         env = request.env
+        if not self._origin_allowed(env):
+            return request.make_json_response(
+                {"error": "Origin not allowed"}, status=403,
+            )
         auth_header = request.httprequest.headers.get("Authorization", "")
 
         # Handle POST requests (Streamable HTTP transport)
@@ -205,6 +233,10 @@ class MCPSSENativeController(http.Controller):
         """
         Receive MCP messages for SSE sessions.
         """
+        if not self._origin_allowed(request.env):
+            return request.make_json_response(
+                {"error": "Origin not allowed"}, status=403,
+            )
         if not sessionId:
             return request.make_json_response(
                 {"error": "sessionId parameter required"},
@@ -280,12 +312,12 @@ class MCPSSENativeController(http.Controller):
                 # Echo the client's protocol version when we support it,
                 # otherwise advertise a recent revision (MCP spec behaviour).
                 supported_protocols = {
-                    "2024-11-05", "2025-03-26", "2025-06-18",
+                    "2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25",
                 }
                 client_proto = params.get("protocolVersion")
                 protocol_version = (
                     client_proto if client_proto in supported_protocols
-                    else "2025-06-18"
+                    else "2025-11-25"
                 )
                 server_name = "Odoo MCP - %s (%s)" % (company_name, db_name)
                 instructions = (

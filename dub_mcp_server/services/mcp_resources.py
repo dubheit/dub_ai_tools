@@ -4,6 +4,8 @@ import re
 
 from odoo.api import Environment
 
+from .mcp_tools import mcp_icons
+
 _logger = logging.getLogger(__name__)
 
 
@@ -28,12 +30,15 @@ def get_resources_list(env, config=None):
                 "mimeType": "application/json",
             })
 
+    icons = mcp_icons(env)
+    for resource in resources:
+        resource.setdefault("icons", icons)
     return resources
 
 
 def get_resource_templates_list(env, config=None):
     """Return dynamic MCP resource templates."""
-    return [
+    templates = [
         {
             "uriTemplate": "odoo://model/{model}/schema",
             "name": "Model Schema",
@@ -53,6 +58,10 @@ def get_resource_templates_list(env, config=None):
             "mimeType": "application/json",
         },
     ]
+    icons = mcp_icons(env)
+    for tmpl in templates:
+        tmpl.setdefault("icons", icons)
+    return templates
 
 
 def read_resource(env, uri, config=None, user_id=None):
