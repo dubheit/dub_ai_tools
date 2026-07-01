@@ -69,7 +69,7 @@
 
     <menuitem id="menu_mcp_my_requests" name="MCP Requests"
               action="action_mcp_my_elicitations"
-              groups="base.group_user" sequence="900"
+              groups="dub_mcp_server.group_mcp_user,-base.group_user" sequence="900"
               web_icon="dub_mcp_server,static/description/icon.png"/>
 
 </odoo>
