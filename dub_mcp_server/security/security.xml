@@ -5,5 +5,20 @@
             <field name="name">MCP Server Manager</field>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
+
+        <!-- Users see only their own elicitations -->
+        <record id="rule_mcp_elicitation_own" model="ir.rule">
+            <field name="name">MCP Elicitation: own only</field>
+            <field name="model_id" ref="model_mcp_server_elicitation"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- Managers see all elicitations -->
+        <record id="rule_mcp_elicitation_all" model="ir.rule">
+            <field name="name">MCP Elicitation: manager all</field>
+            <field name="model_id" ref="model_mcp_server_elicitation"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_mcp_manager'))]"/>
+        </record>
     </data>
 </odoo>

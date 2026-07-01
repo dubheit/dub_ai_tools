@@ -37,6 +37,14 @@ class McpServerElicitation(models.Model):
     )
     value = fields.Char(help="Collected value, bound to the user.")
     expiry = fields.Datetime()
+    url = fields.Char(compute="_compute_url", string="Completion URL")
+
+    def _compute_url(self):
+        base = self.env["ir.config_parameter"].sudo().get_param(
+            "web.base.url", ""
+        )
+        for rec in self:
+            rec.url = "%s/mcp/elicitation/%s" % (base, rec.elicitation_id)
 
     _sql_constraints = [
         ("elicitation_id_uniq", "unique(elicitation_id)",

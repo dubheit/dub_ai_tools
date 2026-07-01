@@ -32,7 +32,8 @@
         "data/mcp_defaults.xml",
         "data/mcp_cron.xml",
         "data/fastapi_endpoint.xml",
-        "views/mcp_config_views.xml"
+        "views/mcp_config_views.xml",
+        "views/mcp_elicitation_views.xml"
     ],
     "images": ["static/description/banner.png"],
     "installable": True,

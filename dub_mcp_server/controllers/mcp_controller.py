@@ -488,11 +488,18 @@ class MCPController(http.Controller):
                         transport=transport, client_ip=self._client_ip()
                     )
                 except UrlElicitationRequired as e:
+                    urls = ", ".join(
+                        el.get("url", "") for el in e.elicitations
+                    )
                     return {
                         "jsonrpc": "2.0", "id": req_id,
                         "error": {
                             "code": -32042,
-                            "message": "This request requires more information.",
+                            "message": (
+                                "More information required. Open this link "
+                                "while logged into Odoo (as yourself), provide "
+                                "the value, then retry: %s" % urls
+                            ),
                             "data": {"elicitations": e.elicitations},
                         },
                     }
