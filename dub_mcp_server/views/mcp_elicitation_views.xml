@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mcp_elicitation_search" model="ir.ui.view">
+        <field name="name">mcp.server.elicitation.search</field>
+        <field name="model">mcp.server.elicitation</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="pending" string="Pending"
+                        domain="[('status', '=', 'pending')]"/>
+                <field name="purpose"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_mcp_elicitation_list" model="ir.ui.view">
+        <field name="name">mcp.server.elicitation.list</field>
+        <field name="model">mcp.server.elicitation</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false">
+                <field name="create_date"/>
+                <field name="purpose"/>
+                <field name="message"/>
+                <field name="status"
+                       decoration-warning="status == 'pending'"
+                       decoration-success="status == 'completed'"/>
+                <field name="url" widget="url" string="Open to complete"
+                       readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mcp_elicitation_form" model="ir.ui.view">
+        <field name="name">mcp.server.elicitation.form</field>
+        <field name="model">mcp.server.elicitation</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="purpose"/>
+                        <field name="message"/>
+                        <field name="status"/>
+                        <field name="create_date"/>
+                        <field name="expiry"/>
+                        <field name="url" widget="url"
+                               string="Open to complete"/>
+                    </group>
+                    <div invisible="status != 'pending'">
+                        <p>Open the link above (while logged into Odoo as
+                           yourself) to provide the requested value, then
+                           return to your AI assistant and retry.</p>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mcp_my_elicitations" model="ir.actions.act_window">
+        <field name="name">My MCP Requests</field>
+        <field name="res_model">mcp.server.elicitation</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No pending MCP requests.</p>
+            <p>When an AI tool needs a value from you, it appears here with a
+               link to a secure page to provide it.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mcp_my_requests" name="MCP Requests"
+              action="action_mcp_my_elicitations"
+              groups="base.group_user" sequence="900"
+              web_icon="dub_mcp_server,static/description/icon.png"/>
+
+</odoo>

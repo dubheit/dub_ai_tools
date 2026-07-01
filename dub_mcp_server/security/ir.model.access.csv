@@ -5,3 +5,4 @@ access_mcp_server_audit,mcp.server.audit,model_mcp_server_audit,dub_mcp_server.g
 access_mcp_model_method,mcp.model.method,model_mcp_model_method,dub_mcp_server.group_mcp_manager,1,1,1,1
 access_mcp_server_task,mcp.server.task,model_mcp_server_task,dub_mcp_server.group_mcp_manager,1,1,1,1
 access_mcp_server_elicitation,mcp.server.elicitation,model_mcp_server_elicitation,dub_mcp_server.group_mcp_manager,1,1,1,1
+access_mcp_server_elicitation_user,mcp.server.elicitation.user,model_mcp_server_elicitation,base.group_user,1,0,0,0
