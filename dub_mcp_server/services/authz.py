@@ -33,11 +33,8 @@ def resolve_config(env, ctx: Optional["AuthContext"] = None):
         cfg = Config.get_by_access_token(token)
         if cfg:
             return cfg
-    # get_by_user is a 19.0 feature (per-user config). On 18.0 the model has
-    # no user-linked config, so fall back to deny-by-default after the token
-    # lookup above.
     user_id = getattr(ctx, "user_id", None) if ctx else None
-    if user_id and hasattr(Config, "get_by_user"):
+    if user_id:
         return Config.get_by_user(user_id)
     return Config.browse()
 
