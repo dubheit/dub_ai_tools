@@ -20,7 +20,7 @@
         - Optional get_logs tool for AI debugging
         - REST API endpoints for programmatic access
     """,
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.0",
     "category": "Tools",
     "author": "Dubhe Srls",
     "website": "https://dubhe.it",
