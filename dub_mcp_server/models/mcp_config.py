@@ -29,6 +29,14 @@ class McpServerConfig(models.Model):
              "via this client will use these MCP rules."
     )
 
+    # Link to specific users for per-user MCP permissions
+    user_ids = fields.Many2many(
+        "res.users",
+        string="Allowed Users",
+        help="If set, only these users will use this config. "
+             "If empty, this config acts as a default fallback."
+    )
+
     transport_stdio = fields.Boolean(default=False)
     transport_http = fields.Boolean(default=True)
 
@@ -78,6 +86,16 @@ class McpServerConfig(models.Model):
     )
 
     @api.model
+    def get_by_user(self, user_id):
+        """Get active config explicitly linked to a specific user."""
+        if user_id:
+            return self.search([
+                ("user_ids", "in", [user_id]),
+                ("active", "=", True)
+            ], limit=1)
+        return self.browse()
+
+    @api.model
     def get_by_oauth2_client(self, client_id):
         """Get active config linked to specific OAuth2 client."""
         if client_id:
@@ -91,13 +109,17 @@ class McpServerConfig(models.Model):
     def get_by_access_token(self, token_string):
         """Get active config based on OAuth2 access token.
 
-        Deny by default: only returns a config if the OAuth2
-        client is explicitly linked to one.
+        Deny by default: only returns a config if the user or
+        the OAuth2 client is explicitly linked to one.
+        Priority: user-specific config > client-specific config.
         """
         try:
             AccessToken = self.env["oauth2.access_token"].sudo()
             token = AccessToken.find_by_token(token_string)
             if token and token.is_valid():
+                user_config = self.get_by_user(token.user_id.id)
+                if user_config:
+                    return user_config
                 return self.get_by_oauth2_client(token.client_id.id)
         except Exception:
             pass

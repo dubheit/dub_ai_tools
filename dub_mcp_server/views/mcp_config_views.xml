@@ -15,6 +15,11 @@
                 name="oauth2_client_id"
                 options="{'no_create': True}"
               />
+              <field
+                name="user_ids"
+                widget="many2many_tags"
+                options="{'no_create': True}"
+              />
             </group>
           </group>
           <group>
@@ -99,6 +104,7 @@
       <list string="MCP Server Configurations">
         <field name="name"/>
         <field name="oauth2_client_id"/>
+        <field name="user_ids" widget="many2many_tags"/>
         <field name="active" column_invisible="1"/>
         <field name="transport_http"/>
       </list>
