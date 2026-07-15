@@ -191,6 +191,28 @@ class McpServerModelRule(models.Model):
         """Clear methods when model changes."""
         self.allowed_method_ids = [(5, 0, 0)]
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("model_id") and vals.get("model_name"):
+                ir_model = self.env["ir.model"].sudo().search(
+                    [("model", "=", vals["model_name"])], limit=1
+                )
+                if ir_model:
+                    vals["model_id"] = ir_model.id
+            vals.pop("model_name", None)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get("model_name") and not vals.get("model_id"):
+            ir_model = self.env["ir.model"].sudo().search(
+                [("model", "=", vals["model_name"])], limit=1
+            )
+            if ir_model:
+                vals["model_id"] = ir_model.id
+        vals.pop("model_name", None)
+        return super().write(vals)
+
     def action_refresh_methods(self):
         """Discover and populate available methods for the model."""
         self.ensure_one()
