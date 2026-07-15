@@ -130,8 +130,6 @@ class McpServerConfig(models.Model):
         """Backward compat — deny by default (empty recordset)."""
         return self.browse()
 
-    get_default = get_singleton
-
 
 class McpServerModelRule(models.Model):
     _name = "mcp.server.model.rule"
