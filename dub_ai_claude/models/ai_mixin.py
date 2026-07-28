@@ -42,10 +42,25 @@ class DubAiMixin(models.AbstractModel):
         if config["temperature"] is not None:
             kwargs["temperature"] = config["temperature"]
 
-        response = client.messages.create(**kwargs)
+        try:
+            response = client.messages.create(**kwargs)
+        except anthropic.BadRequestError as exc:
+            # I modelli piu' recenti (Claude 4.6+) deprecano ``temperature``:
+            # in quel caso ritenta senza il parametro.
+            if "temperature" in kwargs and "temperature" in str(exc):
+                kwargs.pop("temperature")
+                response = client.messages.create(**kwargs)
+            else:
+                raise
 
+        # I modelli con reasoning restituiscono anche blocchi 'thinking':
+        # concatena solo i blocchi di testo, non il primo blocco a caso.
+        text_blocks = [
+            b.text for b in response.content
+            if getattr(b, "type", None) == "text"
+        ]
         return {
-            "text": response.content[0].text,
+            "text": "".join(text_blocks),
             "model": response.model,
             "provider": "claude",
             "usage": {
