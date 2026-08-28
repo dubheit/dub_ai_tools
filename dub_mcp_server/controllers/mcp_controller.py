@@ -17,6 +17,8 @@ from werkzeug.wrappers import Response
 from odoo import fields, http
 from odoo.http import request
 
+from ..services import elicitation, mcp_protocol
+
 _logger = logging.getLogger(__name__)
 
 # Terminal MCP task statuses
@@ -90,6 +92,10 @@ class MCPController(http.Controller):
         auth="none",
         methods=["GET", "POST"],
         csrf=False,
+        # The endpoint writes by design (audit log, elicitations, tasks,
+        # create/update/delete tools): auth="none" would otherwise default
+        # the route to a read-only transaction.
+        readonly=False,
     )
     def mcp_endpoint(self, **kwargs):
         """
@@ -110,6 +116,18 @@ class MCPController(http.Controller):
         # Handle POST requests (Streamable HTTP transport)
         if request.httprequest.method == "POST":
             return self._handle_streamable_http(env, auth_header)
+
+        # Stateless clients must not use the SSE endpoint (2026-07-28
+        # removes the GET stream); no header means a legacy SSE client.
+        if request.httprequest.headers.get(
+            mcp_protocol.MCP_PROTOCOL_VERSION_HEADER
+        ) == mcp_protocol.MCP_VERSION_2026_07_28:
+            return request.make_json_response(
+                {"error": "The SSE endpoint is not available on protocol "
+                          "revision 2026-07-28; use POST /mcp."},
+                status=405,
+                headers=[("Allow", "POST")],
+            )
 
         # GET request handling (SSE transport)
         accept = request.httprequest.headers.get("Accept", "")
@@ -231,6 +249,8 @@ class MCPController(http.Controller):
         auth="none",
         methods=["POST"],
         csrf=False,
+        # Same as /mcp: JSON-RPC dispatch can write (audit, tasks, tools).
+        readonly=False,
     )
     def mcp_message(self, sessionId=None, **kwargs):
         """
@@ -356,23 +376,54 @@ class MCPController(http.Controller):
         return headers.get("X-Real-IP") or request.httprequest.remote_addr or ""
 
     def _handle_mcp_request(self, env, request_data, config=None, user_id=None,
-                            session_id=None, transport="streamable_http"):
-        """Handle MCP JSON-RPC request."""
+                            session_id=None, transport="streamable_http",
+                            profile=None):
+        """Handle MCP JSON-RPC request.
+
+        :param profile: protocol revision profile governing the request; the
+            SSE transport passes nothing and keeps the legacy default.
+        """
         method = request_data.get("method", "")
         params = request_data.get("params", {})
         req_id = request_data.get("id")
+        profile = profile or mcp_protocol.get_profile(None)
 
         try:
+            if profile.stateless:
+                # The stateless revision removes the handshake and ping, and
+                # adds server/discover in their place.
+                if method in ("initialize", "initialized",
+                              "notifications/initialized", "ping"):
+                    return mcp_protocol.make_jsonrpc_error(
+                        -32601, "Method not found: %s" % method,
+                        request_id=req_id,
+                    )
+                if method == "server/discover":
+                    # The only method callable without config/user on this
+                    # profile (pre-auth discovery probe).
+                    return {
+                        "jsonrpc": "2.0", "id": req_id,
+                        "result": mcp_protocol.make_discover_result(),
+                    }
+                # Every other stateless method must carry the client
+                # capabilities block in _meta.
+                meta = params.get("_meta")
+                meta = meta if isinstance(meta, dict) else {}
+                if meta.get(mcp_protocol.META_CLIENT_CAPABILITIES) is None:
+                    return mcp_protocol.make_missing_capability_error(
+                        request_id=req_id,
+                    )
+
             if method == "initialize":
                 # Echo the client's protocol version when we support it,
                 # otherwise advertise a recent revision (MCP spec behaviour).
-                supported_protocols = {
-                    "2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25",
-                }
+                # Only the session-based revisions can be negotiated here: the
+                # stateless one has no handshake, so a client naming it (or an
+                # unknown revision) gets the default session-based fallback.
                 client_proto = params.get("protocolVersion")
                 protocol_version = (
-                    client_proto if client_proto in supported_protocols
-                    else "2025-11-25"
+                    client_proto if client_proto in mcp_protocol.SESSION_VERSIONS
+                    else mcp_protocol.MCP_DEFAULT_VERSION
                 )
                 return {
                     "jsonrpc": "2.0",
@@ -400,7 +451,12 @@ class MCPController(http.Controller):
 
             elif method == "tools/list":
                 from ..services.mcp_tools import get_tools_list
-                tools = get_tools_list(env, config=config)
+                tools = get_tools_list(
+                    env, config=config,
+                    tasks_accepted=mcp_protocol.client_supports_tasks(
+                        params, profile
+                    ),
+                )
                 return {"jsonrpc": "2.0", "id": req_id, "result": {"tools": tools}}
 
             elif method == "tools/call":
@@ -429,15 +485,44 @@ class MCPController(http.Controller):
                 tool_name = params.get("name", "")
                 arguments = params.get("arguments", {})
 
+                # MRTR (2026-07-28): a retried call echoes requestState (and
+                # inputResponses). Correlate it to the pending elicitations:
+                # still waiting for the user -> answer input_required again;
+                # completed -> fall through, the tool resolves the stored
+                # value itself via get_completed_value on re-execution. The
+                # MRTR fields are stripped so they never reach the tool's
+                # argument validation.
+                if profile.uses_mrtr:
+                    arguments = elicitation.strip_mrtr_fields(arguments)
+                    state_ids = elicitation.extract_request_state(params)
+                    if state_ids:
+                        _values, pending = elicitation.resolve_mrtr_retry(
+                            env, user_id, state_ids
+                        )
+                        if pending:
+                            return {
+                                "jsonrpc": "2.0",
+                                "id": req_id,
+                                "result":
+                                    elicitation.build_input_required_result(
+                                        pending
+                                    ),
+                            }
+
                 # Task augmentation (MCP 2025-11-25): if the client wraps the
                 # call with a 'task' field and the tool supports it, create a
                 # durable task and return a CreateTaskResult instead of running
-                # inline.
+                # inline. On the stateless revision tasks are a negotiated
+                # extension: a client that did not declare
+                # io.modelcontextprotocol/tasks gets the same refusal as an
+                # unsupported tool.
                 from ..services.mcp_tools import tool_task_support
                 support = tool_task_support(tool_name)
                 task_param = params.get("task")
                 if task_param is not None:
-                    if support == "forbidden":
+                    if support == "forbidden" or not (
+                        mcp_protocol.client_supports_tasks(params, profile)
+                    ):
                         return {
                             "jsonrpc": "2.0", "id": req_id,
                             "error": {"code": -32601,
@@ -454,9 +539,20 @@ class MCPController(http.Controller):
                         user_id, tool_name, arguments, config=config,
                         transport=transport, ttl_ms=ttl,
                     )
+                    if profile.stateless:
+                        # CreateTaskResult (2026-07-28 tasks extension):
+                        # resultType "task" is preserved by the stateless
+                        # result envelope.
+                        # https://modelcontextprotocol.io/extensions/tasks/overview
+                        task_result = {
+                            "resultType": mcp_protocol.RESULT_TYPE_TASK,
+                            "task": task.to_task_dict_v2(),
+                        }
+                    else:
+                        task_result = {"task": task.to_task_dict()}
                     return {
                         "jsonrpc": "2.0", "id": req_id,
-                        "result": {"task": task.to_task_dict()},
+                        "result": task_result,
                     }
                 if support == "required":
                     return {
@@ -473,21 +569,19 @@ class MCPController(http.Controller):
                         transport=transport, client_ip=self._client_ip()
                     )
                 except UrlElicitationRequired as e:
-                    urls = ", ".join(
-                        el.get("url", "") for el in e.elicitations
+                    # MRTR profile: an elicitation is an input_required
+                    # result, not an error; legacy profiles keep -32042.
+                    if profile.uses_mrtr:
+                        return {
+                            "jsonrpc": "2.0", "id": req_id,
+                            "result":
+                                elicitation.build_input_required_result(
+                                    e.elicitations
+                                ),
+                        }
+                    return elicitation.build_elicitation_error(
+                        e.elicitations, request_id=req_id
                     )
-                    return {
-                        "jsonrpc": "2.0", "id": req_id,
-                        "error": {
-                            "code": -32042,
-                            "message": (
-                                "More information required. Open this link "
-                                "while logged into Odoo (as yourself), provide "
-                                "the value, then retry: %s" % urls
-                            ),
-                            "data": {"elicitations": e.elicitations},
-                        },
-                    }
 
                 # Update context tracking if session is active
                 if session_id and tracking_info:
@@ -543,8 +637,10 @@ class MCPController(http.Controller):
                 }
 
             elif method in ("tasks/get", "tasks/result", "tasks/cancel",
-                            "tasks/list"):
-                return self._handle_tasks(env, method, params, req_id, user_id)
+                            "tasks/list", "tasks/update"):
+                return self._handle_tasks(
+                    env, method, params, req_id, user_id, profile=profile
+                )
 
             elif method == "ping":
                 return {"jsonrpc": "2.0", "id": req_id, "result": {}}
@@ -564,17 +660,41 @@ class MCPController(http.Controller):
                 "error": {"code": -32603, "message": "Internal server error"}
             }
 
-    def _handle_tasks(self, env, method, params, req_id, user_id):
-        """tasks/get | tasks/result | tasks/cancel | tasks/list (MCP tasks).
+    def _handle_tasks(self, env, method, params, req_id, user_id,
+                      profile=None):
+        """tasks/* dispatch (MCP tasks).
 
         Tasks are bound to the authenticated user: get/result/cancel/list only
         touch tasks owned by that user (spec security requirement).
+
+        Legacy revisions serve the 2025-11-25 core method set
+        (``tasks/list|get|result|cancel``). On the stateless revision
+        (2026-07-28) tasks are a negotiated extension: clients that did not
+        declare ``io.modelcontextprotocol/tasks`` get ``-32601``, and so do
+        the methods the revision removed (``tasks/list``, ``tasks/result``).
         """
         import time as _time
 
         def err(code, msg):
             return {"jsonrpc": "2.0", "id": req_id,
                     "error": {"code": code, "message": msg}}
+
+        profile = profile or mcp_protocol.get_profile(None)
+        if not mcp_protocol.task_method_allowed(
+            method, profile,
+            mcp_protocol.client_supports_tasks(params, profile),
+        ):
+            return err(-32601, "Method not found: %s" % method)
+
+        if method == "tasks/update":
+            # No-op acknowledgement by design (2026-07-28): tasks/update
+            # carries the client's inputResponses for tasks in
+            # input_required; this module's tasks never enter that status,
+            # so there is nothing to satisfy. Per spec the server
+            # acknowledges with an empty result and ignores responses for
+            # unknown or already-satisfied keys - it is not an error stub.
+            # https://modelcontextprotocol.io/extensions/tasks/overview
+            return {"jsonrpc": "2.0", "id": req_id, "result": {}}
 
         Task = env["mcp.server.task"].sudo()
 
@@ -595,8 +715,11 @@ class MCPController(http.Controller):
             return err(-32602, "Failed to retrieve task: Task not found")
 
         if method == "tasks/get":
-            return {"jsonrpc": "2.0", "id": req_id,
-                    "result": task.to_task_dict()}
+            if profile.stateless:
+                task_dict = task.to_task_dict_v2()
+            else:
+                task_dict = task.to_task_dict()
+            return {"jsonrpc": "2.0", "id": req_id, "result": task_dict}
 
         if method == "tasks/cancel":
             if task.status in TERMINAL_STATUSES:
@@ -606,6 +729,10 @@ class MCPController(http.Controller):
             task.write({"status": "cancelled",
                         "status_message": "The task was cancelled by request.",
                         "last_updated_at": fields.Datetime.now()})
+            if profile.stateless:
+                # Cooperative cancellation (2026-07-28): acknowledge the
+                # intent with an empty result.
+                return {"jsonrpc": "2.0", "id": req_id, "result": {}}
             return {"jsonrpc": "2.0", "id": req_id,
                     "result": task.to_task_dict()}
 
@@ -629,17 +756,11 @@ class MCPController(http.Controller):
         """
         Handle Streamable HTTP transport (POST requests).
         Stateless request/response - no session management needed.
+
+        The protocol revision is resolved before auth: version faults are
+        transport-level and get HTTP 400. ``server/discover`` on the stateless
+        revision is the only method served without a bearer token.
         """
-        # Validate token
-        config, user_id = get_config_and_user(env, auth_header)
-
-        if not user_id:
-            return request.make_json_response(
-                {"error": "Authentication required. Provide a valid OAuth2 Bearer token."},
-                status=401,
-                headers=[("WWW-Authenticate", "Bearer")],
-            )
-
         # Parse request body
         try:
             body = request.httprequest.get_data(as_text=True)
@@ -651,9 +772,51 @@ class MCPController(http.Controller):
                 "error": {"code": -32700, "message": "Parse error"}
             }, status=400)
 
+        method = request_data.get("method", "")
+        params = request_data.get("params", {})
+
+        # Resolve the protocol revision (transport-level, before auth)
+        profile, error_response = mcp_protocol.resolve_profile(
+            params, request.httprequest.headers
+        )
+        if error_response is not None:
+            error_response["id"] = request_data.get("id")
+            return request.make_json_response(error_response, status=400)
+
+        # Verify the mirrored headers agree with the body
+        error_response = mcp_protocol.validate_mirrored_headers(
+            method, params, request.httprequest.headers
+        )
+        if error_response is not None:
+            error_response["id"] = request_data.get("id")
+            return request.make_json_response(error_response, status=400)
+
+        # server/discover is the only unauthenticated method on the
+        # stateless revision (it is the pre-auth discovery probe).
+        if profile.stateless and method == "server/discover":
+            response = self._handle_mcp_request(env, request_data, profile=profile)
+            if "result" in response:
+                response["result"] = mcp_protocol.make_result_envelope(
+                    response["result"], profile, method
+                )
+            return request.make_json_response(
+                response,
+                headers=[(mcp_protocol.MCP_PROTOCOL_VERSION_HEADER, profile.version)],
+            )
+
+        # Validate token
+        config, user_id = get_config_and_user(env, auth_header)
+
+        if not user_id:
+            return request.make_json_response(
+                {"error": "Authentication required. Provide a valid OAuth2 Bearer token."},
+                status=401,
+                headers=[("WWW-Authenticate", "Bearer")],
+            )
+
         _logger.info(
             "Streamable HTTP request: method=%s, user=%s",
-            request_data.get("method"), user_id
+            method, user_id
         )
 
         # Process request and return response directly
@@ -662,13 +825,25 @@ class MCPController(http.Controller):
             request_data,
             config=config,
             user_id=user_id,
+            profile=profile,
         )
 
         # Sanitize tool responses to prevent oversized SSE messages
         # Skip sanitization for resources (client explicitly requested the data)
-        method = request_data.get("method", "")
         if not method.startswith("resources/"):
             from ..services.response_sanitizer import sanitize_response
             response = sanitize_response(response)
 
-        return request.make_json_response(response)
+        # Stateless revision: wrap every success result in its envelope
+        # (resultType, cache hints, serverInfo) - single choke point.
+        if profile.stateless and "result" in response:
+            response["result"] = mcp_protocol.make_result_envelope(
+                response["result"], profile, method
+            )
+
+        headers = []
+        if profile.stateless:
+            headers.append(
+                (mcp_protocol.MCP_PROTOCOL_VERSION_HEADER, profile.version)
+            )
+        return request.make_json_response(response, headers=headers)
