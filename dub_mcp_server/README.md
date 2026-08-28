@@ -68,9 +68,16 @@ same access rules you configure in Odoo.
 - 🪪 **URL-mode elicitation** — collect sensitive values via a secure Odoo web page
 - 🖼️ **Tool & resource icons** — richer client UI metadata
 
-This module targets **MCP protocol revision 2025-11-25** (it echoes the client's
-version on `initialize` and falls back to the latest it supports). The canonical
-endpoint is **`/mcp`** (the legacy `/mcp/sse` still works as an alias).
+This module targets **MCP protocol revisions 2024-11-05, 2025-03-26,
+2025-06-18 and 2025-11-25** (session-based: `initialize` handshake, SSE
+transport) and **2026-07-28** (stateless core: `server/discover`, per-request
+`_meta` protocol version and client capabilities, `resultType` on every
+result, cache hints on list/read results, MRTR `input_required` elicitation,
+tasks as the negotiated `io.modelcontextprotocol/tasks` extension). Not
+implemented on 2026-07-28: `subscriptions/listen` (the module has no
+server-push notifications to offer) and `tasks/update` (reserved); the SSE
+transport remains for legacy clients only. The canonical endpoint is
+**`/mcp`** (the legacy `/mcp/sse` still works as an alias).
 
 ## Architecture
 
@@ -196,11 +203,16 @@ Tools also expose `icons` metadata, and tools that may run long advertise
 
 ## Tasks (async execution)
 
-For long-running tool calls the server supports **MCP tasks** (revision
-2025-11-25). A client augments a `tools/call` with a `task` field; the server
-stores a durable **`mcp.server.task`** (bound to the authenticated user, with a
-secure id and a TTL), returns a `CreateTaskResult` immediately, and the client
-polls `tasks/get` / `tasks/result` (also `tasks/list`, `tasks/cancel`).
+For long-running tool calls the server supports **MCP tasks**. On the
+session-based revisions (up to 2025-11-25) tasks are a core capability: a
+client augments a `tools/call` with a `task` field; the server stores a
+durable **`mcp.server.task`** (bound to the authenticated user, with a secure
+id and a TTL), returns a `CreateTaskResult` immediately, and the client polls
+`tasks/get` / `tasks/result` (also `tasks/list`, `tasks/cancel`). On
+2026-07-28 tasks are the negotiated extension `io.modelcontextprotocol/tasks`
+(declared in the request `_meta` client capabilities): the blocking
+`tasks/result` and `tasks/list` are removed there, the client polls
+`tasks/get` and may `tasks/cancel`.
 
 - Eligible tools declare `execution.taskSupport` (`optional`/`required`); the
   rest default to `forbidden`. Currently `search` and `call_method` are
@@ -210,7 +222,8 @@ polls `tasks/get` / `tasks/result` (also `tasks/list`, `tasks/cancel`).
 - Install the optional **`dub_mcp_async_task`** module (depends on OCA
   `queue_job`) to run tasks immediately via queue_job instead of the cron.
 
-> Note: tasks are experimental in the MCP spec; not all clients use them yet.
+> Note: tasks moved out of the experimental core into an official extension in
+> MCP 2026-07-28; not all clients use them yet.
 
 ## Elicitation (URL mode)
 
@@ -419,12 +432,26 @@ Implemented from MCP 2025-11-25: canonical `/mcp` endpoint, Origin validation,
 tool/resource icons, tasks (cron + optional queue_job bridge), URL-mode
 elicitation.
 
+Implemented from MCP 2026-07-28: stateless core (`server/discover`, per-request
+`_meta` version/capabilities, `resultType`, cache hints, mirrored request
+headers), MRTR `input_required` elicitation, tasks as a negotiated extension
+(polling `tasks/get` + `tasks/cancel`). Note that 2026-07-28 is still a
+**Release Candidate**: support for it is provisional and may change before the
+final specification is published. Current production clients (Claude Desktop,
+Cursor, Cline) do not negotiate it yet; they keep using the session-based
+revisions via the `initialize` handshake, which this server serves unchanged.
+
 Not yet implemented:
 
 - **Form-mode elicitation** — server-initiated input *during* a tool call.
   Requires a bidirectional channel (the Streamable HTTP POST is single-response):
   the planned approach is via tasks `input_required` + an SSE stream on
   `tasks/result`. Higher complexity/risk; deferred.
+- **`subscriptions/listen`** — the 2026-07-28 server-push channel; the module
+  has no server-initiated notifications to offer, and the SSE stream remains
+  for legacy clients only.
+- **`tasks/update`** — mid-flight client input for tasks; reserved (the tasks
+  of this module are fire-and-poll).
 - **OIDC discovery** and **OAuth Client ID Metadata Documents** — these live in
   `dub_oauth2_provider`, not in this module.
 - **Sampling** — intentionally skipped (no real use case for a CRUD server).

@@ -53,8 +53,14 @@ def tool_task_support(name):
     return TASK_SUPPORT.get(name, "forbidden")
 
 
-def get_tools_list(env: Environment, config=None) -> list:
-    """Get list of available MCP tools"""
+def get_tools_list(env: Environment, config=None, tasks_accepted=True) -> list:
+    """Get list of available MCP tools.
+
+    :param tasks_accepted: whether the client negotiated the tasks extension;
+        when False the ``execution.taskSupport`` annotation is omitted
+        (2026-07-28 makes tasks a negotiated extension). Defaults to True,
+        the legacy behaviour where tasks are a core capability.
+    """
     tools = [
         {
             "name": "list_models",
@@ -459,7 +465,7 @@ def get_tools_list(env: Environment, config=None) -> list:
     for tool in tools:
         tool.setdefault("icons", icons)
         ts = TASK_SUPPORT.get(tool["name"])
-        if ts:
+        if ts and tasks_accepted:
             tool.setdefault("execution", {"taskSupport": ts})
     return tools
 

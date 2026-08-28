@@ -6,6 +6,7 @@ from . import (
     errors,
     introspect,
     log_buffer,
+    mcp_protocol,
     mcp_tools,
     ratelimit,
     response_sanitizer,

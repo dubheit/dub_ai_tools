@@ -155,6 +155,34 @@ class McpServerTask(models.Model):
             "pollInterval": self.poll_interval_ms or DEFAULT_POLL_MS,
         }
 
+    def to_task_dict_v2(self):
+        """Return the Task object of the 2026-07-28 tasks extension.
+
+        The 2026 revision renames the timing fields (``ttlMs``,
+        ``pollIntervalMs``) and inlines the outcome on terminal states:
+        ``result`` on completed (the CallToolResult the wrapped call would
+        have returned synchronously), a JSON-RPC ``error`` object on failed.
+        https://modelcontextprotocol.io/extensions/tasks/overview
+        """
+        self.ensure_one()
+        task = {
+            "taskId": self.task_id,
+            "status": self.status,
+            "ttlMs": self.ttl_ms or DEFAULT_TTL_MS,
+        }
+        if self.poll_interval_ms:
+            task["pollIntervalMs"] = self.poll_interval_ms
+        if self.status_message:
+            task["statusMessage"] = self.status_message
+        if self.status == "completed":
+            task["result"] = self.to_call_tool_result()
+        elif self.status == "failed":
+            task["error"] = {
+                "code": -32603,
+                "message": self.status_message or "Task execution failed",
+            }
+        return task
+
     def to_call_tool_result(self):
         """Return the CallToolResult for tasks/result on a terminal task."""
         self.ensure_one()
