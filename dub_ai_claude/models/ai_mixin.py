@@ -12,7 +12,17 @@ class DubAiMixin(models.AbstractModel):
         except ImportError:
             raise UserError(_("anthropic package not installed."))
 
-        client = anthropic.Anthropic(api_key=config["api_key"])
+        # Niente brotli: su Odoo.sh convivono httpx 0.28 e un pacchetto brotli
+        # il cui Decompressor espone ``process()`` e non ``decompress()``.
+        # L'httpx prende allora il ramo scritto per brotlipy e lo chiama con
+        # argomenti che quella firma non accetta, quindi ogni risposta
+        # compressa in brotli muore in decodifica - e l'SDK la ripresenta come
+        # APIConnectionError, che manda a cercare un problema di rete che non
+        # c'e'. Su risposte JSON gzip vale quanto brotli.
+        client = anthropic.Anthropic(
+            api_key=config["api_key"],
+            default_headers={"accept-encoding": "gzip, deflate"},
+        )
 
         content = []
         for img in (images or []):
