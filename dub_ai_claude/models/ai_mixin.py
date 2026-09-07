@@ -44,9 +44,11 @@ class DubAiMixin(models.AbstractModel):
 
         try:
             response = client.messages.create(**kwargs)
-        except anthropic.BadRequestError as exc:
-            # I modelli piu' recenti (Claude 4.6+) deprecano ``temperature``:
-            # in quel caso ritenta senza il parametro.
+        except (anthropic.BadRequestError, TypeError) as exc:
+            # I modelli piu' recenti (Claude 4.6+) deprecano ``temperature``.
+            # L'API risponde 400, ma dalla 1.x l'SDK non inoltra nemmeno la
+            # chiamata: rifiuta il parametro in locale con un TypeError, che
+            # non e' un BadRequestError e sfuggiva a questo ripiego.
             if "temperature" in kwargs and "temperature" in str(exc):
                 kwargs.pop("temperature")
                 response = client.messages.create(**kwargs)
