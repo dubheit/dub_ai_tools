@@ -12,7 +12,17 @@ class DubAiMixin(models.AbstractModel):
         except ImportError:
             raise UserError(_("anthropic package not installed."))
 
-        client = anthropic.Anthropic(api_key=config["api_key"])
+        # Niente brotli: su Odoo.sh convivono httpx 0.28 e un pacchetto brotli
+        # il cui Decompressor espone ``process()`` e non ``decompress()``.
+        # L'httpx prende allora il ramo scritto per brotlipy e lo chiama con
+        # argomenti che quella firma non accetta, quindi ogni risposta
+        # compressa in brotli muore in decodifica - e l'SDK la ripresenta come
+        # APIConnectionError, che manda a cercare un problema di rete che non
+        # c'e'. Su risposte JSON gzip vale quanto brotli.
+        client = anthropic.Anthropic(
+            api_key=config["api_key"],
+            default_headers={"accept-encoding": "gzip, deflate"},
+        )
 
         content = []
         for img in (images or []):
@@ -42,10 +52,27 @@ class DubAiMixin(models.AbstractModel):
         if config["temperature"] is not None:
             kwargs["temperature"] = config["temperature"]
 
-        response = client.messages.create(**kwargs)
+        try:
+            response = client.messages.create(**kwargs)
+        except (anthropic.BadRequestError, TypeError) as exc:
+            # I modelli piu' recenti (Claude 4.6+) deprecano ``temperature``.
+            # L'API risponde 400, ma dalla 1.x l'SDK non inoltra nemmeno la
+            # chiamata: rifiuta il parametro in locale con un TypeError, che
+            # non e' un BadRequestError e sfuggiva a questo ripiego.
+            if "temperature" in kwargs and "temperature" in str(exc):
+                kwargs.pop("temperature")
+                response = client.messages.create(**kwargs)
+            else:
+                raise
 
+        # I modelli con reasoning restituiscono anche blocchi 'thinking':
+        # concatena solo i blocchi di testo, non il primo blocco a caso.
+        text_blocks = [
+            b.text for b in response.content
+            if getattr(b, "type", None) == "text"
+        ]
         return {
-            "text": response.content[0].text,
+            "text": "".join(text_blocks),
             "model": response.model,
             "provider": "claude",
             "usage": {
