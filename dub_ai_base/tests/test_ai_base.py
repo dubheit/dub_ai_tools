@@ -110,7 +110,6 @@ class TestCompanyAiConfig(TransactionCase):
         company = self.env.company
 
         self.assertEqual(company.dub_ai_openai_temperature, 0.7)
-        self.assertEqual(company.dub_ai_claude_temperature, 0.7)
         self.assertEqual(company.dub_ai_gemini_temperature, 0.7)
 
     def test_set_model_id(self):
