@@ -10,19 +10,63 @@
                     <setting string="Claude Configuration" help="Configure Anthropic Claude API settings">
                         <div class="content-group">
                             <div class="row mt16">
+                                <label for="dub_ai_claude_route" string="Route" class="col-lg-3"/>
+                                <field name="dub_ai_claude_route" class="w-50"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route != 'direct'">
                                 <label for="dub_ai_claude_api_key" string="API Key" class="col-lg-3"/>
                                 <field name="dub_ai_claude_api_key" placeholder="sk-ant-xxxxxxx" class="w-50" password="True"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route not in ['bedrock', 'bedrock_invoke']">
+                                <label for="dub_ai_claude_aws_region" string="AWS Region" class="col-lg-3"/>
+                                <field name="dub_ai_claude_aws_region" class="w-50"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route not in ['bedrock', 'bedrock_invoke']">
+                                <label for="dub_ai_claude_aws_access_key_id" string="AWS Access Key ID" class="col-lg-3"/>
+                                <field name="dub_ai_claude_aws_access_key_id" placeholder="AKIA..." class="w-50"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route not in ['bedrock', 'bedrock_invoke']">
+                                <label for="dub_ai_claude_aws_secret_access_key" string="AWS Secret Access Key" class="col-lg-3"/>
+                                <field name="dub_ai_claude_aws_secret_access_key" class="w-50" password="True"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route not in ['bedrock', 'bedrock_invoke']">
+                                <label for="dub_ai_claude_bedrock_api_key" string="Bedrock API Key" class="col-lg-3"/>
+                                <field name="dub_ai_claude_bedrock_api_key" class="w-50" password="True"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route not in ['bedrock', 'bedrock_invoke']">
+                                <div class="col-lg-3"/>
+                                <div class="text-muted w-50">
+                                    Leave the AWS credentials empty to use the default credential chain
+                                    (environment variables, instance or task role). The Bedrock API key,
+                                    when set, replaces them.
+                                </div>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route != 'vertex'">
+                                <label for="dub_ai_claude_gcp_project_id" string="Google Project ID" class="col-lg-3"/>
+                                <field name="dub_ai_claude_gcp_project_id" class="w-50"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route != 'vertex'">
+                                <label for="dub_ai_claude_gcp_region" string="Google Location" class="col-lg-3"/>
+                                <field name="dub_ai_claude_gcp_region" class="w-50"/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route != 'vertex'">
+                                <label for="dub_ai_claude_gcp_credentials" string="Service Account Key" class="col-lg-3"/>
+                                <field name="dub_ai_claude_gcp_credentials" class="w-50" placeholder='{"type": "service_account", ...}'/>
+                            </div>
+                            <div class="row mt16" invisible="dub_ai_claude_route != 'vertex'">
+                                <div class="col-lg-3"/>
+                                <div class="text-muted w-50">
+                                    Leave the service account key empty to use the Application Default
+                                    Credentials of the host. The EU multi-region keeps inference inside
+                                    the European Union; single regions serve Claude Sonnet 4.6 and earlier only.
+                                </div>
                             </div>
                             <div class="row mt16">
                                 <label for="dub_ai_claude_model_id" string="Model" class="col-lg-3"/>
                                 <field name="dub_ai_claude_model_id" class="w-50" options="{'no_create': True}" domain="[('provider', '=', 'claude'), ('active', '=', True)]"/>
                             </div>
-                            <div class="row mt16">
-                                <label for="dub_ai_claude_temperature" string="Temperature" class="col-lg-3"/>
-                                <field name="dub_ai_claude_temperature" class="w-25"/>
-                            </div>
                             <div class="mt16">
-                                <button name="action_sync_claude" type="object" string="Sync Models" class="btn-secondary" icon="fa-refresh"/> <button name="action_test_claude" type="object" string="Test Connection" class="btn-secondary" icon="fa-heartbeat"/>
+                                <button name="action_sync_claude" type="object" string="Sync Models" class="btn-secondary" icon="fa-refresh" invisible="dub_ai_claude_route != 'direct'"/> <button name="action_test_claude" type="object" string="Test Connection" class="btn-secondary" icon="fa-heartbeat"/>
                             </div>
                         </div>
                     </setting>

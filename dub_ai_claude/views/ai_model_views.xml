@@ -9,6 +9,24 @@
             <xpath expr="//header/button[@name='action_sync_all_models']" position="after">
                 <button name="action_sync_claude_models" type="object" string="Sync Claude"/>
             </xpath>
+            <xpath expr="//field[@name='display_name']" position="after">
+                <field name="bedrock_model_id" optional="hide"/>
+                <field name="bedrock_invoke_model_id" optional="hide"/>
+                <field name="vertex_model_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_ai_model_form_claude" model="ir.ui.view">
+        <field name="name">dub.ai.model.form.claude</field>
+        <field name="model">dub.ai.model</field>
+        <field name="inherit_id" ref="dub_ai_base.view_ai_model_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='display_name']" position="after">
+                <field name="bedrock_model_id" invisible="provider != 'claude'"/>
+                <field name="bedrock_invoke_model_id" invisible="provider != 'claude'"/>
+                <field name="vertex_model_id" invisible="provider != 'claude'"/>
+            </xpath>
         </field>
     </record>
 

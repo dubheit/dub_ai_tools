@@ -1,32 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo>
 
-    <record id="ai_model_claude_opus_46" model="dub.ai.model">
-        <field name="name">claude-opus-4-6-20260320</field>
-        <field name="display_name">Claude Opus 4.6</field>
+    <!-- Deliberately updatable, unlike the other providers' catalogues: the
+         per-route identifiers below are facts about the platforms, not user
+         data, and a stale mapping fails at call time with a confusing error.
+         An upgrade rewrites only the fields declared here, so archiving a
+         model, or adding your own, survives it. -->
+
+    <!-- One identifier per route: the Anthropic API id in "name", the
+         Bedrock Messages-API endpoint in "bedrock_model_id", the Bedrock EU
+         cross-region inference profile in "bedrock_invoke_model_id". On
+         Google Cloud the id matches "name" for every model below, so
+         "vertex_model_id" stays empty.
+
+         The empty cells are deliberate. Sonnet 4.6 is not served by the
+         Bedrock Messages-API endpoint, only by InvokeModel. Fable 5.1 has no
+         EU inference profile, only a global one, so it is unusable on the
+         InvokeModel route while data must stay in the EU.
+
+         Which models an AWS account can actually reach differs per endpoint
+         and region: list them with the AWS CLI command
+         "bedrock list-inference-profiles" for the region you use. -->
+
+    <record id="ai_model_claude_opus_55" model="dub.ai.model">
+        <field name="name">claude-opus-5-5</field>
+        <field name="display_name">Claude Opus 5.5</field>
         <field name="provider">claude</field>
+        <field name="bedrock_invoke_model_id">eu.anthropic.claude-opus-5-5</field>
+        <field name="bedrock_model_id">anthropic.claude-opus-5-5</field>
         <field name="supports_vision" eval="True"/>
         <field name="supports_tools" eval="True"/>
-        <field name="max_output_tokens">16384</field>
+        <field name="max_output_tokens">128000</field>
         <field name="sequence">1</field>
     </record>
-    <record id="ai_model_claude_sonnet_46" model="dub.ai.model">
-        <field name="name">claude-sonnet-4-6-20260320</field>
-        <field name="display_name">Claude Sonnet 4.6</field>
+    <record id="ai_model_claude_sonnet_55" model="dub.ai.model">
+        <field name="name">claude-sonnet-5-5</field>
+        <field name="display_name">Claude Sonnet 5.5</field>
         <field name="provider">claude</field>
+        <field name="bedrock_invoke_model_id">eu.anthropic.claude-sonnet-5-5</field>
+        <field name="bedrock_model_id">anthropic.claude-sonnet-5-5</field>
         <field name="supports_vision" eval="True"/>
         <field name="supports_tools" eval="True"/>
-        <field name="max_output_tokens">16384</field>
+        <field name="max_output_tokens">128000</field>
         <field name="sequence">2</field>
     </record>
-    <record id="ai_model_claude_haiku_45" model="dub.ai.model">
-        <field name="name">claude-haiku-4-5-20251001</field>
-        <field name="display_name">Claude Haiku 4.5</field>
+    <record id="ai_model_claude_haiku_55" model="dub.ai.model">
+        <field name="name">claude-haiku-5-5</field>
+        <field name="display_name">Claude Haiku 5.5</field>
         <field name="provider">claude</field>
+        <field name="bedrock_invoke_model_id">eu.anthropic.claude-haiku-5-5</field>
+        <field name="bedrock_model_id">anthropic.claude-haiku-5-5</field>
         <field name="supports_vision" eval="True"/>
         <field name="supports_tools" eval="True"/>
-        <field name="max_output_tokens">8192</field>
+        <field name="max_output_tokens">128000</field>
         <field name="sequence">3</field>
+    </record>
+    <record id="ai_model_claude_fable_51" model="dub.ai.model">
+        <field name="name">claude-fable-5-1</field>
+        <field name="display_name">Claude Fable 5.1</field>
+        <field name="provider">claude</field>
+        <field name="bedrock_model_id">anthropic.claude-fable-5-1</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">128000</field>
+        <field name="sequence">4</field>
+    </record>
+    <record id="ai_model_claude_opus_48" model="dub.ai.model">
+        <field name="name">claude-opus-4-8</field>
+        <field name="display_name">Claude Opus 4.8</field>
+        <field name="provider">claude</field>
+        <field name="bedrock_invoke_model_id">eu.anthropic.claude-opus-4-8</field>
+        <field name="bedrock_model_id">anthropic.claude-opus-4-8</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">128000</field>
+        <field name="sequence">5</field>
+    </record>
+    <record id="ai_model_claude_sonnet_5" model="dub.ai.model">
+        <field name="name">claude-sonnet-5</field>
+        <field name="display_name">Claude Sonnet 5</field>
+        <field name="provider">claude</field>
+        <field name="bedrock_invoke_model_id">eu.anthropic.claude-sonnet-5</field>
+        <field name="bedrock_model_id">anthropic.claude-sonnet-5</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">128000</field>
+        <field name="sequence">6</field>
+    </record>
+
+    <record id="ai_model_claude_sonnet_4_6" model="dub.ai.model">
+        <field name="name">claude-sonnet-4-6</field>
+        <field name="display_name">Claude Sonnet 4.6</field>
+        <field name="provider">claude</field>
+        <field name="bedrock_invoke_model_id">eu.anthropic.claude-sonnet-4-6</field>
+        <field name="supports_vision" eval="True"/>
+        <field name="supports_tools" eval="True"/>
+        <field name="max_output_tokens">128000</field>
+        <field name="sequence">7</field>
     </record>
 
 </odoo>
