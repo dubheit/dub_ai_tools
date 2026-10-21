@@ -10,11 +10,42 @@ import logging
 
 from odoo import models
 from odoo.api import Environment
+from odoo.exceptions import MissingError, UserError
 
 from . import security
 from .errors import UrlElicitationRequired
 
 _logger = logging.getLogger(__name__)
+
+# Generic ORM methods have dedicated tools, which apply the CRUD permissions of the
+# model rule: call_method points clients to them instead of only refusing.
+CRUD_METHOD_HINTS = {
+    "create": "use the 'create' tool",
+    "write": "use the 'update' tool",
+    "unlink": "use the 'delete' tool",
+    "action_archive": "use the 'update' tool with values {\"active\": false}",
+    "action_unarchive": "use the 'update' tool with values {\"active\": true}",
+    "toggle_active": "use the 'update' tool with values {\"active\": false} or {\"active\": true}",
+}
+
+# Audit operation recorded when a tool call is refused.
+TOOL_AUDIT_OPERATION = {
+    "list_models": "list_models",
+    "list_fields": "list_fields",
+    "search": "search",
+    "read": "read",
+    "create": "create",
+    "update": "write",
+    "delete": "unlink",
+    "list_methods": "list_methods",
+    "call_method": "call_method",
+    "get_record_actions": "get_record_actions",
+    "get_selection_values": "get_selection_values",
+    "domain_validate": "domain_validate",
+    "name_search": "name_search",
+    "get_logs": "get_logs",
+    "read_resource": "read_resource",
+}
 
 
 def create_mcp_response(id, result=None, error=None) -> dict:
@@ -251,7 +282,11 @@ def get_tools_list(env: Environment, config=None, tasks_accepted=True) -> list:
         },
         {
             "name": "call_method",
-            "description": "Call a method on Odoo model records",
+            "description": (
+                "Call a business method enabled for the model (see list_methods). "
+                "Do not use it to create, modify, archive or delete records: "
+                "use the create, update and delete tools."
+            ),
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -703,7 +738,41 @@ def execute_tool(
     """
     Execute an MCP tool and return the result as string.
     Uses user_id context if provided for proper access control.
+    Refused calls are audited here, since each tool returns its refusal
+    without writing an audit entry.
     """
+    result = _execute_tool(
+        env, tool_name, arguments, config=config, user_id=user_id,
+        return_tracking_info=return_tracking_info,
+        transport=transport, client_ip=client_ip,
+    )
+    text = result[0] if return_tracking_info else result
+    operation = TOOL_AUDIT_OPERATION.get(tool_name)
+    if config and operation and isinstance(text, str) and text.startswith("Access denied"):
+        arguments = arguments if isinstance(arguments, dict) else {}
+        try:
+            ids = _ensure_int_list(arguments.get("ids"), [])
+        except (TypeError, ValueError):
+            ids = []
+        audit_env = env(context=dict(
+            env.context or {}, mcp_transport=transport, mcp_client_ip=client_ip,
+        ))
+        _audit(
+            audit_env, config, user_id, operation,
+            model=arguments.get("model"), status="denied",
+            record_ids=ids or None,
+            request_excerpt={"tool": tool_name, "method": arguments.get("method")},
+            error_excerpt=text,
+        )
+    return result
+
+
+def _execute_tool(
+    env: Environment, tool_name: str, arguments: dict,
+    config=None, user_id=None, return_tracking_info: bool = False,
+    transport: str = "streamable_http", client_ip: str = ""
+):
+    """Run the tool; see execute_tool."""
     _logger.info(
         "execute_tool called: tool=%s, user_id=%s, env.user=%s",
         tool_name, user_id, env.user.id
@@ -902,9 +971,15 @@ def execute_tool(
             accessible = env[model].search([("id", "in", ids)])
             denied_ids = set(ids) - set(accessible.ids)
             if not accessible:
-                if denied_ids:
+                missing_ids = denied_ids - set(env[model].browse(sorted(denied_ids)).exists().ids)
+                if denied_ids - missing_ids:
                     return _build_result(
-                        f"Access denied: no permission to read {model} records {sorted(denied_ids)}",
+                        f"Access denied: no permission to read {model} records {sorted(denied_ids - missing_ids)}",
+                        [], return_tracking_info
+                    )
+                if missing_ids:
+                    return _build_result(
+                        f"Error: {model} records not found: {sorted(missing_ids)}",
                         [], return_tracking_info
                     )
                 return _build_result("No records found", [], return_tracking_info)
@@ -1041,8 +1116,11 @@ def execute_tool(
                 return _build_result("Error: values must be a dictionary", [], return_tracking_info)
 
             # Check Odoo ACL + record rules for the authenticated user
+            records = env[model].browse(ids)
+            missing_ids = sorted(set(ids) - set(records.exists().ids))
+            if missing_ids:
+                return _build_result(f"Error: {model} records not found: {missing_ids}", [], return_tracking_info)
             try:
-                records = env[model].browse(ids)
                 records.check_access('write')
             except Exception:
                 return _build_result(f"Access denied: user cannot write these {model} records", [], return_tracking_info)
@@ -1110,8 +1188,11 @@ def execute_tool(
                 return _build_result(f"Error: {err}", [], return_tracking_info)
 
             # Check Odoo ACL + record rules for the authenticated user
+            records = env[model].browse(ids)
+            missing_ids = sorted(set(ids) - set(records.exists().ids))
+            if missing_ids:
+                return _build_result(f"Error: {model} records not found: {missing_ids}", [], return_tracking_info)
             try:
-                records = env[model].browse(ids)
                 records.check_access('unlink')
             except Exception:
                 return _build_result(f"Access denied: user cannot delete these {model} records", [], return_tracking_info)
@@ -1195,7 +1276,10 @@ def execute_tool(
 
             allowed_methods = rule.allowed_method_ids.mapped("name")
             if method_name not in allowed_methods:
-                return _build_result(f"Access denied: Method '{method_name}' not allowed on {model}", [], return_tracking_info)
+                message = f"Access denied: Method '{method_name}' not allowed on {model}"
+                if method_name in CRUD_METHOD_HINTS:
+                    message += f". To do this, {CRUD_METHOD_HINTS[method_name]}"
+                return _build_result(message, [], return_tracking_info)
 
             # Get arguments
             ids = _ensure_int_list(arguments.get("ids"), [])
@@ -1604,4 +1688,19 @@ def execute_tool(
     except Exception as e:
         # Log the full error internally, return sanitized message
         _logger.exception("MCP tool execution error")
-        return _build_result("Error: An internal error occurred. Please try again.", [], return_tracking_info)
+        if isinstance(e, ValueError) and str(e).startswith("Invalid field"):
+            # ORM message naming the unknown field: safe to return, and the client can fix the call.
+            message = f"Error: {e}. Use list_fields to see the fields of the model."
+        elif isinstance(e, UserError):
+            # Business errors (ValidationError, AccessError, MissingError...) are meant for users.
+            message = f"Error: {e.args[0] if e.args else e}"
+        else:
+            message = "Error: An internal error occurred. Please try again."
+        operation = TOOL_AUDIT_OPERATION.get(tool_name)
+        if config and operation:
+            _audit(
+                env, config, user_id, operation,
+                model=(arguments or {}).get("model") if isinstance(arguments, dict) else None,
+                status="fail", error_excerpt=str(e),
+            )
+        return _build_result(message, [], return_tracking_info)

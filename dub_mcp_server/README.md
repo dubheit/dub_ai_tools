@@ -191,7 +191,7 @@ and provide the OAuth2 client credentials. See
 | `domain_validate` | Validate an Odoo domain against a model without executing it |
 | `get_record_actions` | List the actions available on a record |
 | `list_methods` | Discover whitelisted methods of a model |
-| `call_method` | Call a whitelisted method with positional or keyword arguments |
+| `call_method` | Call a whitelisted method with positional or keyword arguments. `create`, `write`, `unlink` and archiving go through the dedicated tools: if they are not whitelisted, the refusal names the tool to use |
 | `get_logs` *(optional)* | Tail recent Odoo logs for debugging (requires `allow_logs_tool`) |
 
 Denied fields (per-rule `field_denylist` plus the always-denied
@@ -377,8 +377,15 @@ Every request is logged to `mcp.server.audit` with:
 - timestamp, user, IP, transport
 - operation (`discover`, `search`, `read`, `create`, ...)
 - model and record IDs
-- `status` (`success` or `fail`)
+- `status`: `success`, `denied` (refused by the MCP rules or the Odoo access
+  rights) or `fail` (error while running the tool)
 - truncated request excerpt and error excerpt
+
+Errors returned to the client are specific where it is safe: records that do
+not exist are reported as not found (not as access denied), unknown fields are
+named by the Odoo message, and Odoo business errors (`UserError`,
+`ValidationError`) keep their text. Any other exception returns a generic
+error and is logged in full on the server.
 
 Available at **Settings → Technical → MCP Server → Audit Log**. A cron job
 applies the configured retention.

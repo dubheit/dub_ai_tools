@@ -4,3 +4,4 @@ from . import test_mcp_config
 from . import test_mcp_oauth2
 from . import test_mcp_protocol
 from . import test_mcp_streamable_2026
+from . import test_mcp_tools_errors
